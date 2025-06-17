@@ -1,0 +1,5 @@
+# Daily Log
+
+## Actions
+
+## Notes

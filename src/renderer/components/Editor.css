@@ -1,0 +1,22 @@
+.editor {
+  flex: 1;
+  display: flex;
+  background-color: #ffffff;
+}
+
+.editor-textarea {
+  flex: 1;
+  padding: 20px;
+  border: none;
+  outline: none;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  background-color: #ffffff;
+  resize: none;
+}
+
+.editor-textarea::placeholder {
+  color: #999;
+}

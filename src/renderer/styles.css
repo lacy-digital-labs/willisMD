@@ -1,0 +1,188 @@
+/* Markdown syntax highlighting styles */
+.markdown-editor {
+  font-family: Monaco, "SF Mono", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Headers */
+.markdown-h1,
+.markdown-h2,
+.markdown-h3,
+.markdown-h4,
+.markdown-h5,
+.markdown-h6 {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+/* Bold text */
+.markdown-bold {
+  color: #1976d2;
+  font-weight: bold;
+}
+
+/* Italic text */
+.markdown-italic {
+  color: #7b1fa2;
+  font-style: italic;
+}
+
+/* Code */
+.markdown-code {
+  background-color: #f5f5f5;
+  color: #d32f2f;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: Monaco, Consolas, monospace;
+}
+
+/* Code blocks */
+.markdown-code-block {
+  background-color: #f5f5f5;
+  color: #333;
+  display: block;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-family: Monaco, Consolas, monospace;
+}
+
+/* Links */
+.markdown-link {
+  color: #1976d2;
+  text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-blockquote {
+  color: #666;
+  border-left: 4px solid #ddd;
+  padding-left: 10px;
+  font-style: italic;
+}
+
+/* Lists */
+.markdown-list {
+  color: #f57c00;
+}
+
+/* Horizontal rules */
+.markdown-hr {
+  color: #999;
+}
+
+/* Highlighting layer */
+.editor-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Shared text styles - MUST be identical */
+.highlight-layer,
+.editor-textarea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  padding: 15px;
+  font-family: Monaco, "SF Mono", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: normal;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: left;
+  overflow: auto;
+}
+
+.highlight-layer {
+  color: transparent;
+  pointer-events: none;
+  z-index: 1;
+  background-color: transparent;
+  resize: none;
+  /* Hide scrollbars */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.highlight-layer::-webkit-scrollbar {
+  display: none;
+}
+
+.editor-textarea {
+  color: #333;
+  background-color: transparent;
+  outline: none;
+  resize: none;
+  z-index: 2;
+  /* Ensure proper text rendering */
+  -webkit-text-fill-color: #333;
+  caret-color: #333;
+}
+
+/* Dark theme styles */
+[data-theme="dark"] body,
+[data-theme="dark"] .editor-textarea {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  -webkit-text-fill-color: #e0e0e0;
+  caret-color: #e0e0e0;
+}
+
+[data-theme="dark"] .markdown-editor {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .markdown-h1,
+[data-theme="dark"] .markdown-h2,
+[data-theme="dark"] .markdown-h3,
+[data-theme="dark"] .markdown-h4,
+[data-theme="dark"] .markdown-h5,
+[data-theme="dark"] .markdown-h6 {
+  color: #4caf50;
+}
+
+[data-theme="dark"] .markdown-bold {
+  color: #64b5f6;
+}
+
+[data-theme="dark"] .markdown-italic {
+  color: #ba68c8;
+}
+
+[data-theme="dark"] .markdown-code {
+  background-color: #2d2d2d;
+  color: #f44336;
+}
+
+[data-theme="dark"] .markdown-code-block {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .markdown-link {
+  color: #64b5f6;
+}
+
+[data-theme="dark"] .markdown-blockquote {
+  color: #aaa;
+  border-left-color: #555;
+}
+
+[data-theme="dark"] .markdown-list {
+  color: #ff9800;
+}
+
+[data-theme="dark"] .markdown-hr {
+  color: #666;
+}

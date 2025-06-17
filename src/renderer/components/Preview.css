@@ -1,0 +1,123 @@
+.preview {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+
+.preview-content {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Markdown styling */
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.preview-content h1 {
+  font-size: 2em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 0.3em;
+}
+
+.preview-content h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 0.3em;
+}
+
+.preview-content h3 {
+  font-size: 1.25em;
+}
+
+.preview-content p {
+  margin-bottom: 16px;
+}
+
+.preview-content code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.preview-content pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+.preview-content pre code {
+  padding: 0;
+  background-color: transparent;
+}
+
+.preview-content blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+  margin-bottom: 16px;
+}
+
+.preview-content ul,
+.preview-content ol {
+  padding-left: 2em;
+  margin-bottom: 16px;
+}
+
+.preview-content li {
+  margin-bottom: 0.25em;
+}
+
+.preview-content table {
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.preview-content table th,
+.preview-content table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.preview-content table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+.preview-content a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.preview-content a:hover {
+  text-decoration: underline;
+}
+
+.preview-content img {
+  max-width: 100%;
+  box-sizing: content-box;
+}
+
+.preview-content hr {
+  height: 0.25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: #e1e4e8;
+  border: 0;
+}
