@@ -1,145 +1,57 @@
-name: Build and Release
+name: Build/Release with Electron Builder Action
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    tags:
+      - 'v*'
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build renderer
-        run: npm run build:renderer
-
   release:
-    needs: test
     runs-on: ${{ matrix.os }}
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     strategy:
       matrix:
-        include:
-          - os: macos-latest
-            platform: mac
-          - os: windows-latest
-            platform: win
-          - os: ubuntu-latest
-            platform: linux
-
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out Git repository
+        uses: actions/checkout@v4
       
-      - name: Setup Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
           cache: 'npm'
-          
+      
       - name: Install dependencies
         run: npm ci
-        
-      - name: Install system dependencies (Linux)
-        if: matrix.platform == 'linux'
+      
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2-dev libxcomposite-dev libxdamage-dev libxrandr-dev libgbm-dev libxss-dev libasound2-dev
-          
-      - name: Build application
-        run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Upload artifacts (macOS)
-        if: matrix.platform == 'mac'
-        uses: actions/upload-artifact@v4
-        with:
-          name: willisMD-mac
-          path: |
-            build/*.dmg
-            build/*.zip
-            build/*.blockmap
-            
-      - name: Upload artifacts (Windows)
-        if: matrix.platform == 'win'
-        uses: actions/upload-artifact@v4
-        with:
-          name: willisMD-windows
-          path: |
-            build/*.exe
-            build/*.nsis.7z
-            build/*.blockmap
-            
-      - name: Upload artifacts (Linux)
-        if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: willisMD-linux
-          path: |
-            build/*.AppImage
-            build/*.deb
-            build/*.tar.gz
-            build/*.blockmap
-
-  create-release:
-    needs: release
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-      - uses: actions/checkout@v4
       
-      - name: Get version from package.json
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-        
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - name: Build React app
+        run: npm run build:renderer
+      
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
         with:
-          path: artifacts
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: ${{ github.ref == 'refs/heads/main' }}
+          skip_build: true
           
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: willisMD v${{ steps.version.outputs.version }}
-          body: |
-            ## willisMD v${{ steps.version.outputs.version }}
-            
-            A cross-platform markdown editor with live preview, built with Electron and React.
-            
-            ### Download for your platform:
-            - **macOS**: Download the `.dmg` file
-            - **Windows**: Download the `.exe` file  
-            - **Linux**: Download the `.AppImage` or `.deb` file
-            
-            ### What's New
-            - Built from commit ${{ github.sha }}
-            - Automated release via GitHub Actions
-            
-            ### Installation
-            - **macOS**: Open the DMG and drag willisMD to Applications
-            - **Windows**: Run the installer executable
-            - **Linux**: Make the AppImage executable or install the DEB package
-            
-            ---
-            
-            **Full Changelog**: https://github.com/${{ github.repository }}/commits/v${{ steps.version.outputs.version }}
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: dist-${{ matrix.os }}
+          path: |
+            dist/
+            build/
