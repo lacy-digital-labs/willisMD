@@ -8,49 +8,111 @@ willisMD is a markdown editor application currently in the planning phase. The p
 
 ## Current Project Status
 
-**IMPORTANT**: This project is not yet initialized. As of now, only the README.md exists with the project vision. Before any development work, the project needs to be properly initialized.
+The project has been initialized with a working Electron + React application. The basic structure is in place with:
+- Main process handling file operations and window management
+- Renderer process with React components for the UI
+- Split-pane editor with live markdown preview
+- Tab support for multiple files
+- Basic toolbar and file operations
 
-## Planned Technology Stack
+## Technology Stack
 
-- **Framework**: Electron (for cross-platform desktop app)
-- **UI Library**: React
-- **Language**: JavaScript/TypeScript (to be determined)
+- **Framework**: Electron 36.4.0
+- **UI Library**: React 19.1.0
+- **Language**: JavaScript (ES6+)
+- **Bundler**: Webpack 5
+- **Markdown Parser**: marked 15.0.12
 - **Platforms**: macOS, Windows, Linux
 
-## Key Features to Implement
+## Implemented Features
 
-1. Visual markdown editor with automatic preview
-2. Basic file operations (create, open, save)
-3. Multi-window support
-4. Tab support for multiple files
-5. Advanced markdown support:
-   - Tables
-   - Hyperlinks
+1. ✅ Visual markdown editor with automatic preview
+2. ✅ Basic file operations (open, save, save as)
+3. ✅ Tab support for multiple files
+4. ✅ Toolbar for markdown formatting
+5. ✅ Export functionality (HTML, PDF, DOCX)
+6. ✅ Template support for new documents
+7. ✅ Syntax highlighting in editor
+8. ✅ Undo/redo functionality
+9. ✅ Auto-save toggle with configurable interval
+10. ✅ Preferences/settings window with persistence
+11. ✅ Find and replace functionality with regex support
+12. ✅ Recent files and folders menu
+
+## Features to Implement
+
+1. Multi-window support
+2. Advanced markdown support:
+   - Tables (partial support via marked)
+   - Task lists
    - Footnotes
-6. Undo/redo functionality
-7. Auto-save toggle
+   - Math equations (LaTeX)
+   - Mermaid diagrams
+3. Themes (light/dark mode)
+4. Plugin system for extensibility
+5. Keyboard shortcuts for all menu actions
+6. Better editor with CodeMirror or Monaco Editor
 
 ## Development Commands
 
-The project is now initialized with a basic Electron + React structure. Use these commands:
-
-- `npm start` - Run the application in development mode
-- `npm run dev` - Same as npm start
-- `npm run build` - Build the application for production
+- `npm start` or `npm run dev` - Run the application in development mode (starts both webpack dev server and Electron)
+- `npm run dev:renderer` - Run only the React development server
+- `npm run dev:electron` - Run only the Electron app
+- `npm run build` - Build the application for production (both renderer and Electron)
 - `npm run build:renderer` - Build only the React app
-- `npm run build:electron` - Package the Electron app
+- `npm run build:electron` - Package the Electron app with electron-builder
 - `npm test` - Run tests (test framework not yet configured)
 
-## Architecture Considerations
+## Project Structure
 
-When implementing this project, consider:
+```
+src/
+├── main/
+│   ├── main.js          # Main Electron process
+│   ├── exportUtils.js   # Export functionality (PDF, DOCX, etc.)
+│   └── preferences.js   # Preferences window handler
+├── preload/
+│   └── preload.js       # Preload script for secure IPC
+├── renderer/
+│   ├── App.js           # Main React component
+│   ├── components/
+│   │   ├── Editor.js    # Markdown editor component
+│   │   ├── Preview.js   # Preview pane component
+│   │   ├── TabBar.js    # Tab management component
+│   │   └── Toolbar.js   # Formatting toolbar
+│   ├── MarkdownUtils.js # Markdown processing utilities
+│   └── styles/          # CSS files
+└── templates/           # Document templates
+```
 
-1. **Main Process vs Renderer Process**: Electron apps have a main process (Node.js) and renderer processes (web pages). File operations should be handled in the main process.
+## Architecture Notes
 
-2. **IPC Communication**: Use Electron's IPC (Inter-Process Communication) for communication between main and renderer processes.
+1. **IPC Communication**: The app uses contextBridge in the preload script to expose safe APIs to the renderer process. All file operations go through IPC channels.
 
-3. **State Management**: Consider using React Context or a state management library for handling multiple windows and tabs.
+2. **State Management**: Currently using React state in App.js. Consider migrating to Context API or Zustand for more complex state management.
 
-4. **Markdown Processing**: You'll need a markdown parser/renderer library (e.g., marked, markdown-it).
+3. **Markdown Processing**: Using the `marked` library for markdown parsing with DOMPurify for sanitization.
 
-5. **Editor Component**: Consider using or building upon existing React markdown editor components.
+4. **Editor**: Currently using a basic textarea. Consider upgrading to CodeMirror or Monaco Editor for better features.
+
+5. **Export Functionality**: Supports HTML, PDF (via puppeteer), and DOCX (via html-to-docx) exports.
+
+## Key Dependencies
+
+- **electron**: 36.4.0 - Desktop app framework
+- **react**: 19.1.0 - UI framework
+- **marked**: 15.0.12 - Markdown parser
+- **dompurify**: 3.2.6 - HTML sanitization
+- **puppeteer**: 24.10.1 - PDF export
+- **html-to-docx**: 1.8.0 - DOCX export
+- **webpack**: 5.99.9 - Module bundler
+- **babel**: 7.27.x - JavaScript transpiler
+
+## Known Issues & TODOs
+
+1. Tests are not yet configured
+2. The editor is a basic textarea - could benefit from CodeMirror or Monaco Editor for advanced features
+3. Keyboard shortcuts only implemented for basic actions (more could be added)
+4. Multi-window support not implemented
+5. Theme switching (light/dark mode) not yet implemented
+6. No plugin system for extensibility

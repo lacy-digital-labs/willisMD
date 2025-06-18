@@ -1,0 +1,228 @@
+.find-replace-container {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  z-index: 100;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--shadow-medium);
+  min-width: 350px;
+  max-width: 400px;
+  pointer-events: auto;
+  color: var(--text-primary);
+}
+
+/* Ensure find dialog doesn't cover text on smaller screens */
+@media (max-width: 800px) {
+  .find-replace-container {
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+.find-replace-bar {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px;
+  gap: 8px;
+}
+
+.find-replace-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-section, .replace-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input-group, .replace-input-group {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.search-input, .replace-input {
+  width: 100%;
+  padding: 6px 8px;
+  padding-right: 60px; /* Space for search info */
+  border: 1px solid var(--border-medium);
+  border-radius: 3px;
+  font-size: 13px;
+  outline: none;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.search-input:focus, .replace-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.replace-input {
+  padding-right: 8px; /* No search info for replace */
+}
+
+.search-info {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
+  padding: 2px 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.search-controls, .replace-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.control-button {
+  padding: 6px 8px;
+  border: 1px solid var(--border-medium);
+  border-radius: 3px;
+  background-color: var(--bg-accent);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-dark);
+}
+
+.control-button:active:not(:disabled) {
+  background-color: var(--bg-tertiary);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-button.active {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.control-button.active:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.options-section {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-left: 4px;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.option-label input[type="checkbox"] {
+  margin: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.option-label span {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background-color: var(--bg-accent);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  min-width: 20px;
+  text-align: center;
+}
+
+.option-label:has(input:checked) span {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.close-button {
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.close-button:hover {
+  background-color: var(--bg-accent);
+  color: var(--text-primary);
+}
+
+.close-button:active {
+  background-color: var(--bg-tertiary);
+}
+
+/* Force textarea selection to remain visible even when not focused */
+textarea.find-highlight-active::selection {
+  background-color: #ffeb3b !important;
+  color: #000 !important;
+}
+
+/* This is the key - override browser default to keep selection visible */
+textarea.find-highlight-active:not(:focus)::selection {
+  background-color: #ffeb3b !important;
+  color: #000 !important;
+}
+
+/* Some browsers need this for inactive selections */
+textarea.find-highlight-active::inactive-selection {
+  background-color: #ffeb3b !important;
+  color: #000 !important;
+}
+
+/* Webkit-specific hack to keep selection visible */
+textarea.find-highlight-active:not(:focus) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Alternative approach using text-shadow to simulate highlight */
+textarea.find-highlight-active.manual-highlight {
+  background-image: linear-gradient(transparent 0%, transparent 100%);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+}
+
+/* Theme variables handle all color variations automatically */

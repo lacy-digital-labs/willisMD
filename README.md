@@ -82,6 +82,27 @@ willisMD is a visual markdown editor designed for simplicity and productivity. I
 - Voice dictation support
 - AI-powered writing assistance
 
+## Current Status
+
+willisMD v0.6.0 is a fully functional markdown editor with:
+- Split-pane editor with live markdown preview
+- Tab support for multiple files
+- Basic file operations (open, save, save as)
+- Syntax highlighting in the editor
+- Toolbar for common markdown formatting
+- Export functionality (HTML, PDF, DOCX)
+- Templates for new documents
+- Professional custom icon and branding
+
+## Downloads
+
+Get the latest release from the [Releases page](https://github.com/stacylacy/willisMD/releases).
+
+### Supported Platforms:
+- **macOS** (Apple Silicon & Intel): Download the `.dmg` file
+- **Windows** (64-bit): Download the `.exe` installer
+- **Linux**: Download the `.AppImage` (universal) or `.deb` (Debian/Ubuntu)
+
 ## Development Setup
 
 ```bash
@@ -92,16 +113,25 @@ cd willisMD
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (runs both Electron and webpack dev server)
 npm start
 
-# Run tests
+# Run tests (not yet configured)
 npm test
 
 # Build for production
 npm run build
 ```
 
+## Development Commands
+
+- `npm start` or `npm run dev` - Run the application in development mode
+- `npm run dev:renderer` - Run only the React dev server
+- `npm run dev:electron` - Run only the Electron app
+- `npm run build` - Build both renderer and Electron app
+- `npm run build:renderer` - Build only the React app
+- `npm run build:electron` - Package the Electron app
+
 ## License
 
-[To be determined]
+MIT License

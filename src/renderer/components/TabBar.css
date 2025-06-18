@@ -1,7 +1,7 @@
 .tab-bar {
   display: flex;
-  background-color: #e8e8e8;
-  border-bottom: 1px solid #d0d0d0;
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
   min-height: 32px;
 }
@@ -10,8 +10,9 @@
   display: flex;
   align-items: center;
   padding: 0 12px;
-  background-color: #e8e8e8;
-  border-right: 1px solid #d0d0d0;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-light);
   cursor: pointer;
   user-select: none;
   min-width: 100px;
@@ -20,11 +21,12 @@
 }
 
 .tab:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-accent);
 }
 
 .tab.active {
-  background-color: #ffffff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .tab-title {
@@ -39,7 +41,7 @@
 
 .dirty-indicator {
   margin-right: 4px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 16px;
 }
 
@@ -49,13 +51,13 @@
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
   padding: 2px 4px;
   border-radius: 3px;
   line-height: 1;
 }
 
 .tab-close:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: #333;
+  background-color: var(--bg-accent);
+  color: var(--text-primary);
 }

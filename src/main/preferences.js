@@ -6,7 +6,7 @@ class PreferencesManager {
   constructor() {
     this.preferencesPath = path.join(app.getPath('userData'), 'preferences.json');
     this.defaultPreferences = {
-      theme: 'light', // 'light' or 'dark'
+      theme: 'light', // 'light', 'dark', 'forest-green', 'blue-moon', 'monochrome', 'valentine', 'desert', 'polar', 'orange-blossom', 'christmas'
       defaultFolder: null, // path to default folder
       templatesFolder: null, // path to templates folder
       autoSave: false,
@@ -15,7 +15,9 @@ class PreferencesManager {
       fontFamily: 'monospace',
       wordWrap: true,
       showLineNumbers: false,
-      tabSize: 2
+      tabSize: 2,
+      recentFiles: [], // recently opened files
+      recentFolders: [] // recently opened folders
     };
     this.preferences = { ...this.defaultPreferences };
     this.loaded = false;
@@ -117,6 +119,100 @@ class PreferencesManager {
       console.error('Failed to read templates folder:', error);
       return [];
     }
+  }
+
+  // Add a file to recent files list
+  async addRecentFile(filePath) {
+    if (!filePath) return;
+    
+    let recentFiles = this.get('recentFiles') || [];
+    
+    // Remove if already exists to avoid duplicates
+    recentFiles = recentFiles.filter(f => f !== filePath);
+    
+    // Add to beginning of list
+    recentFiles.unshift(filePath);
+    
+    // Keep only last 10 files
+    recentFiles = recentFiles.slice(0, 10);
+    
+    await this.set('recentFiles', recentFiles);
+  }
+
+  // Add a folder to recent folders list
+  async addRecentFolder(folderPath) {
+    if (!folderPath) return;
+    
+    let recentFolders = this.get('recentFolders') || [];
+    
+    // Remove if already exists to avoid duplicates
+    recentFolders = recentFolders.filter(f => f !== folderPath);
+    
+    // Add to beginning of list
+    recentFolders.unshift(folderPath);
+    
+    // Keep only last 10 folders
+    recentFolders = recentFolders.slice(0, 10);
+    
+    await this.set('recentFolders', recentFolders);
+  }
+
+  // Get recent files, filtering out non-existent ones
+  async getRecentFiles() {
+    const recentFiles = this.get('recentFiles') || [];
+    const validFiles = [];
+    
+    for (const filePath of recentFiles) {
+      try {
+        const stats = await fs.stat(filePath);
+        if (stats.isFile()) {
+          validFiles.push(filePath);
+        }
+      } catch {
+        // File no longer exists, skip it
+      }
+    }
+    
+    // Update the list if any files were removed
+    if (validFiles.length !== recentFiles.length) {
+      await this.set('recentFiles', validFiles);
+    }
+    
+    return validFiles;
+  }
+
+  // Get recent folders, filtering out non-existent ones
+  async getRecentFolders() {
+    const recentFolders = this.get('recentFolders') || [];
+    const validFolders = [];
+    
+    for (const folderPath of recentFolders) {
+      try {
+        const stats = await fs.stat(folderPath);
+        if (stats.isDirectory()) {
+          validFolders.push(folderPath);
+        }
+      } catch {
+        // Folder no longer exists, skip it
+      }
+    }
+    
+    // Update the list if any folders were removed
+    if (validFolders.length !== recentFolders.length) {
+      await this.set('recentFolders', validFolders);
+    }
+    
+    return validFolders;
+  }
+
+  // Clear recent files list
+  async clearRecentFiles() {
+    await this.set('recentFiles', []);
+  }
+
+  // Clear recent folders list
+  async clearRecentFolders() {
+    await this.set('recentFolders', []);
   }
 }
 

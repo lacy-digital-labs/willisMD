@@ -57,6 +57,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Preferences menu events
   onShowPreferences: (callback) => ipcRenderer.on('menu-show-preferences', callback),
   
+  // About dialog
+  readAboutContent: () => ipcRenderer.invoke('read-about-content'),
+  onShowAbout: (callback) => {
+    console.log('Preload: Setting up onShowAbout listener');
+    ipcRenderer.on('menu-show-about', (event) => {
+      console.log('Preload: Received menu-show-about event');
+      callback();
+    });
+  },
+  
+  // Find and Replace
+  onFind: (callback) => ipcRenderer.on('menu-find', callback),
+  onReplace: (callback) => ipcRenderer.on('menu-replace', callback),
+  
+  // Recent files and folders
+  getRecentFiles: () => ipcRenderer.invoke('get-recent-files'),
+  getRecentFolders: () => ipcRenderer.invoke('get-recent-folders'),
+  addRecentFile: (filePath) => ipcRenderer.invoke('add-recent-file', filePath),
+  addRecentFolder: (folderPath) => ipcRenderer.invoke('add-recent-folder', folderPath),
+  
   // Save confirmation events
   onCheckUnsavedChanges: (callback) => ipcRenderer.on('check-unsaved-changes', callback),
   onSaveAllBeforeQuit: (callback) => ipcRenderer.on('save-all-before-quit', callback),

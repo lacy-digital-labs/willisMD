@@ -3,11 +3,21 @@ import ReactDOM from 'react-dom/client';
 import { marked } from 'marked';
 import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
+import AboutDialog from './components/AboutDialog';
+import FindReplace from './components/FindReplace';
 import './styles.css';
+import './themes.css';
 
 // Enhanced Editor Component with undo/redo support and scroll sync
-function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
+function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat, onShowFindReplace, editorRef, isFindReplaceOpen }) {
   const textareaRef = useRef(null);
+  
+  // Expose textarea ref to parent
+  useEffect(() => {
+    if (editorRef) {
+      editorRef.current = textareaRef.current;
+    }
+  }, [editorRef]);
   
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -44,6 +54,18 @@ function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
           case 'k':
             e.preventDefault();
             handleFormat('link');
+            break;
+          case 'f':
+            if (!isFindReplaceOpen) {
+              e.preventDefault();
+              onShowFindReplace && onShowFindReplace(false); // Show find only
+            }
+            break;
+          case 'h':
+            if ((e.metaKey || e.ctrlKey) && !isFindReplaceOpen) {
+              e.preventDefault();
+              onShowFindReplace && onShowFindReplace(true); // Show find and replace
+            }
             break;
           default:
             break;
@@ -181,8 +203,10 @@ function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
       const originalStart = textarea.selectionStart;
       const originalEnd = textarea.selectionEnd;
       
-      // Focus the textarea
-      textarea.focus();
+      // Focus the textarea only if find/replace is not open
+      if (!isFindReplaceOpen) {
+        textarea.focus();
+      }
       
       // Method 1: Try to use execCommand for simple selection replacements
       if (originalStart !== originalEnd || action === 'bold' || action === 'italic' || 
@@ -223,7 +247,9 @@ function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
       // Set cursor position after React updates
       setTimeout(() => {
         textarea.setSelectionRange(result.cursorPos, result.cursorPos);
-        textarea.focus();
+        if (!isFindReplaceOpen) {
+          textarea.focus();
+        }
       }, 0);
     } else {
       console.log('No result from formatting function');
@@ -241,6 +267,7 @@ function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
   
   return React.createElement('textarea', {
     ref: textareaRef,
+    className: 'editor',
     style: {
       width: '100%',
       height: '100%',
@@ -251,8 +278,10 @@ function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat }) {
       fontSize: '14px',
       lineHeight: '1.6',
       resize: 'none',
-      backgroundColor: '#ffffff',
-      color: '#333'
+      backgroundColor: 'var(--editor-bg)',
+      color: 'var(--editor-text)',
+      boxSizing: 'border-box',
+      minWidth: 0 // Prevent flex shrinking issues
     },
     value: content || '',
     onChange: (e) => onChange(e.target.value),
@@ -295,13 +324,17 @@ function Preview({ content, onScroll, scrollToPercentage }) {
 
   return React.createElement('div', {
     ref: previewRef,
+    className: 'preview',
     style: {
       padding: '15px',
       height: '100%',
       overflow: 'auto',
-      backgroundColor: '#fafafa',
+      backgroundColor: 'var(--preview-bg)',
+      color: 'var(--preview-text)',
       fontFamily: 'Georgia, serif',
-      lineHeight: '1.6'
+      lineHeight: '1.6',
+      boxSizing: 'border-box',
+      minWidth: 0 // Prevent flex shrinking issues
     },
     onScroll: handleScrollEvent,
     dangerouslySetInnerHTML: { __html: renderMarkdown(content) }
@@ -750,9 +783,9 @@ function TableDropdown({ onFormat }) {
 // Toolbar Component for markdown formatting
 function Toolbar({ onFormat }) {
   const buttonStyle = {
-    border: '1px solid #ddd',
-    backgroundColor: '#f8f8f8',
-    color: '#333',
+    border: '1px solid var(--border-medium)',
+    backgroundColor: 'var(--bg-accent)',
+    color: 'var(--text-primary)',
     padding: '6px 10px',
     margin: '0 2px',
     cursor: 'pointer',
@@ -764,8 +797,9 @@ function Toolbar({ onFormat }) {
   };
   
   const buttonHoverStyle = {
-    backgroundColor: '#e8e8e8',
-    borderColor: '#ccc'
+    backgroundColor: 'var(--accent-primary)',
+    color: 'var(--text-inverse)',
+    borderColor: 'var(--accent-primary)'
   };
   
   const createButton = (label, action, title, icon = null) => {
@@ -792,17 +826,16 @@ function Toolbar({ onFormat }) {
       style: {
         width: '1px',
         height: '24px',
-        backgroundColor: '#ddd',
+        backgroundColor: 'var(--border-medium)',
         margin: '0 8px'
       }
     });
   };
   
   return React.createElement('div', {
+    className: 'toolbar',
     style: {
       padding: '8px 12px',
-      backgroundColor: '#f0f0f0',
-      borderBottom: '1px solid #ddd',
       display: 'flex',
       alignItems: 'center',
       flexWrap: 'wrap',
@@ -867,13 +900,13 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
   };
   
   return React.createElement('div', {
+    className: 'modal-backdrop',
     style: {
       position: 'fixed',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -884,19 +917,21 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
     }
   },
     React.createElement('div', {
+      className: 'modal-content',
       style: {
-        backgroundColor: 'white',
         padding: '20px',
         borderRadius: '8px',
         minWidth: '500px',
         maxWidth: '600px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         maxHeight: '80vh',
         overflow: 'auto'
       }
     },
       React.createElement('h2', {
-        style: { margin: '0 0 20px 0' }
+        style: { 
+          margin: '0 0 20px 0',
+          color: 'var(--text-primary)'
+        }
       }, 'Preferences'),
       
       // Theme Setting
@@ -907,7 +942,8 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           style: { 
             display: 'block', 
             marginBottom: '8px', 
-            fontWeight: 'bold' 
+            fontWeight: 'bold',
+            color: 'var(--text-primary)'
           }
         }, 'Theme'),
         React.createElement('select', {
@@ -919,12 +955,22 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           style: {
             width: '100%',
             padding: '8px',
-            border: '1px solid #ddd',
-            borderRadius: '4px'
+            border: '1px solid var(--border-medium)',
+            borderRadius: '4px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)'
           }
         },
           React.createElement('option', { value: 'light' }, 'Light'),
-          React.createElement('option', { value: 'dark' }, 'Dark')
+          React.createElement('option', { value: 'dark' }, 'Dark'),
+          React.createElement('option', { value: 'forest-green' }, 'Forest Green'),
+          React.createElement('option', { value: 'blue-moon' }, 'Blue Moon'),
+          React.createElement('option', { value: 'monochrome' }, 'Monochrome'),
+          React.createElement('option', { value: 'valentine' }, 'Valentine'),
+          React.createElement('option', { value: 'desert' }, 'Desert'),
+          React.createElement('option', { value: 'polar' }, 'Polar'),
+          React.createElement('option', { value: 'orange-blossom' }, 'Orange Blossom'),
+          React.createElement('option', { value: 'christmas' }, 'Christmas')
         )
       ),
       
@@ -950,18 +996,20 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             style: {
               flex: 1,
               padding: '8px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f9f9f9'
+              backgroundColor: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)'
             }
           }),
           React.createElement('button', {
             onClick: () => handleFolderSelect('defaultFolder'),
             style: {
               padding: '8px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: 'var(--bg-accent)',
+              color: 'var(--text-primary)',
               cursor: 'pointer'
             }
           }, 'Browse'),
@@ -972,9 +1020,10 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             })),
             style: {
               padding: '8px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: 'var(--bg-accent)',
+              color: 'var(--text-primary)',
               cursor: 'pointer'
             }
           }, 'Clear')
@@ -989,7 +1038,8 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           style: { 
             display: 'block', 
             marginBottom: '8px', 
-            fontWeight: 'bold' 
+            fontWeight: 'bold',
+            color: 'var(--text-primary)'
           }
         }, 'Templates Folder'),
         React.createElement('div', {
@@ -1003,18 +1053,20 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             style: {
               flex: 1,
               padding: '8px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f9f9f9'
+              backgroundColor: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)'
             }
           }),
           React.createElement('button', {
             onClick: () => handleFolderSelect('templatesFolder'),
             style: {
               padding: '8px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: 'var(--bg-accent)',
+              color: 'var(--text-primary)',
               cursor: 'pointer'
             }
           }, 'Browse'),
@@ -1025,9 +1077,10 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             })),
             style: {
               padding: '8px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-medium)',
               borderRadius: '4px',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: 'var(--bg-accent)',
+              color: 'var(--text-primary)',
               cursor: 'pointer'
             }
           }, 'Clear')
@@ -1053,7 +1106,12 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
               autoSave: e.target.checked
             }))
           }),
-          React.createElement('span', { style: { fontWeight: 'bold' } }, 'Enable Auto Save')
+          React.createElement('span', { 
+            style: { 
+              fontWeight: 'bold',
+              color: 'var(--text-primary)'
+            } 
+          }, 'Enable Auto Save')
         ),
         localPrefs.autoSave && React.createElement('div', {
           style: { marginTop: '8px', marginLeft: '26px' }
@@ -1063,7 +1121,7 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
               display: 'block', 
               marginBottom: '4px', 
               fontSize: '14px',
-              color: '#666'
+              color: 'var(--text-secondary)'
             }
           }, 'Auto Save Interval (seconds)'),
           React.createElement('input', {
@@ -1078,8 +1136,10 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             style: {
               width: '80px',
               padding: '4px 8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px'
+              border: '1px solid var(--border-medium)',
+              borderRadius: '4px',
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)'
             }
           })
         )
@@ -1093,16 +1153,17 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           gap: '8px',
           marginTop: '20px',
           paddingTop: '20px',
-          borderTop: '1px solid #eee'
+          borderTop: '1px solid var(--border-light)'
         }
       },
         React.createElement('button', {
           onClick: onClose,
           style: {
             padding: '8px 16px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-medium)',
             borderRadius: '4px',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--bg-accent)',
+            color: 'var(--text-primary)',
             cursor: 'pointer'
           }
         }, 'Cancel'),
@@ -1110,10 +1171,10 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           onClick: handleSave,
           style: {
             padding: '8px 16px',
-            border: '1px solid #007bff',
+            border: '1px solid var(--accent-primary)',
             borderRadius: '4px',
-            backgroundColor: '#007bff',
-            color: 'white',
+            backgroundColor: 'var(--accent-primary)',
+            color: 'var(--text-inverse)',
             cursor: 'pointer'
           }
         }, 'Save')
@@ -1132,13 +1193,13 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
   };
   
   return React.createElement('div', {
+    className: 'modal-backdrop',
     style: {
       position: 'fixed',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -1149,23 +1210,29 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
     }
   },
     React.createElement('div', {
+      className: 'modal-content',
       style: {
-        backgroundColor: 'white',
         padding: '20px',
         borderRadius: '8px',
         minWidth: '400px',
         maxWidth: '500px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         maxHeight: '60vh',
         overflow: 'auto'
       }
     },
       React.createElement('h2', {
-        style: { margin: '0 0 20px 0' }
+        style: { 
+          margin: '0 0 20px 0',
+          color: 'var(--text-primary)'
+        }
       }, 'Choose Template'),
       
       templates.length === 0 ? React.createElement('p', {
-        style: { color: '#666', textAlign: 'center', margin: '20px 0' }
+        style: { 
+          color: 'var(--text-secondary)', 
+          textAlign: 'center', 
+          margin: '20px 0' 
+        }
       }, 'No templates found. Configure a templates folder in Preferences.') : 
       
       React.createElement('div', {
@@ -1173,10 +1240,11 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
       },
         React.createElement('div', {
           style: {
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-medium)',
             borderRadius: '4px',
             maxHeight: '300px',
-            overflow: 'auto'
+            overflow: 'auto',
+            backgroundColor: 'var(--bg-primary)'
           }
         },
           templates.map(template => 
@@ -1184,19 +1252,27 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
               key: template.path,
               style: {
                 padding: '12px',
-                borderBottom: '1px solid #eee',
+                borderBottom: '1px solid var(--border-light)',
                 cursor: 'pointer',
-                ':hover': { backgroundColor: '#f5f5f5' }
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)'
               },
-              onMouseEnter: (e) => e.target.style.backgroundColor = '#f5f5f5',
-              onMouseLeave: (e) => e.target.style.backgroundColor = 'white',
+              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
+              onMouseLeave: (e) => e.target.style.backgroundColor = 'var(--bg-primary)',
               onClick: () => handleSelect(template)
             },
               React.createElement('div', {
-                style: { fontWeight: 'bold', marginBottom: '4px' }
+                style: { 
+                  fontWeight: 'bold', 
+                  marginBottom: '4px',
+                  color: 'var(--text-primary)'
+                }
               }, template.name),
               React.createElement('div', {
-                style: { fontSize: '12px', color: '#666' }
+                style: { 
+                  fontSize: '12px', 
+                  color: 'var(--text-secondary)'
+                }
               }, template.path)
             )
           )
@@ -1210,16 +1286,17 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
           alignItems: 'center',
           marginTop: '20px',
           paddingTop: '20px',
-          borderTop: '1px solid #eee'
+          borderTop: '1px solid var(--border-light)'
         }
       },
         React.createElement('button', {
           onClick: () => handleSelect(null),
           style: {
             padding: '8px 16px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-medium)',
             borderRadius: '4px',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--bg-accent)',
+            color: 'var(--text-primary)',
             cursor: 'pointer'
           }
         }, 'Blank File'),
@@ -1227,9 +1304,10 @@ function TemplateDialog({ isOpen, onClose, templates, onSelect }) {
           onClick: onClose,
           style: {
             padding: '8px 16px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-medium)',
             borderRadius: '4px',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--bg-accent)',
+            color: 'var(--text-primary)',
             cursor: 'pointer'
           }
         }, 'Cancel')
@@ -1276,9 +1354,19 @@ function App() {
   const [showPreferences, setShowPreferences] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [showAboutDialog, setShowAboutDialog] = useState(false);
+  const [showFindReplace, setShowFindReplace] = useState(false);
+  
+  // Editor ref for find/replace
+  const editorTextareaRef = useRef(null);
   
   // Get current tab
   const currentTab = tabs.find(tab => tab.id === activeTabId) || tabs[0];
+  
+  // Debug effect for showAboutDialog
+  useEffect(() => {
+    console.log('App: showAboutDialog state changed to:', showAboutDialog);
+  }, [showAboutDialog]);
   
   // Use ref to access current tab in callbacks
   const currentTabRef = useRef(currentTab);
@@ -1294,17 +1382,39 @@ function App() {
   // Theme helper function
   const applyTheme = (theme) => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.setAttribute('data-theme', 'dark');
+    const validThemes = [
+      'light', 'dark', 'forest-green', 'blue-moon', 'monochrome',
+      'valentine', 'desert', 'polar', 'orange-blossom', 'christmas'
+    ];
+    
+    if (validThemes.includes(theme) && theme !== 'light') {
+      root.setAttribute('data-theme', theme);
     } else {
+      // Default to light theme (no data-theme attribute needed)
       root.removeAttribute('data-theme');
     }
+    
+    console.log('Applied theme:', theme);
   };
   
   // Preferences handlers
   const handleShowPreferences = () => {
     console.log('App: Show preferences requested');
     setShowPreferences(true);
+  };
+  
+  // About dialog handler
+  const handleShowAbout = () => {
+    console.log('App: Show about requested - handleShowAbout called');
+    console.log('App: Current showAboutDialog state:', showAboutDialog);
+    setShowAboutDialog(true);
+    console.log('App: Setting showAboutDialog to true');
+  };
+  
+  // Find/Replace handler
+  const handleShowFindReplace = (withReplace = false) => {
+    console.log('App: Show find/replace requested, withReplace:', withReplace);
+    setShowFindReplace(true);
   };
   
   const handleSavePreferences = async (newPreferences) => {
@@ -1515,6 +1625,11 @@ function App() {
       console.log('App: Open folder requested:', folderPath);
       setCurrentFolder(folderPath);
       setStatus(`Opened folder: ${folderPath.split('/').pop()}`);
+      
+      // Add to recent folders
+      window.electronAPI.addRecentFolder(folderPath).catch(error => {
+        console.error('Failed to add to recent folders:', error);
+      });
     };
     
     // Set up panel toggle handlers from menu
@@ -1696,6 +1811,11 @@ function App() {
       window.electronAPI.onExportEPUB(handleExportEPUB);
       window.electronAPI.onExportDOCX(handleExportDOCX);
       window.electronAPI.onShowPreferences(handleShowPreferences);
+      console.log('App: Registering onShowAbout listener');
+      window.electronAPI.onShowAbout(handleShowAbout);
+      console.log('App: onShowAbout listener registered');
+      window.electronAPI.onFind(() => handleShowFindReplace(false));
+      window.electronAPI.onReplace(() => handleShowFindReplace(true));
       window.electronAPI.onCheckUnsavedChanges(handleCheckUnsavedChanges);
       window.electronAPI.onSaveAllBeforeQuit(handleSaveAllBeforeQuit);
       console.log('App: All listeners registered');
@@ -1715,6 +1835,10 @@ function App() {
       window.electronAPI.removeAllListeners('menu-open-folder');
       window.electronAPI.removeAllListeners('menu-toggle-explorer');
       window.electronAPI.removeAllListeners('menu-toggle-preview');
+      window.electronAPI.removeAllListeners('menu-show-preferences');
+      window.electronAPI.removeAllListeners('menu-show-about');
+      window.electronAPI.removeAllListeners('menu-find');
+      window.electronAPI.removeAllListeners('menu-replace');
     };
   }, []);
   
@@ -1932,6 +2056,11 @@ function App() {
           setTabs(prev => [...prev, newTab]);
           setActiveTabId(newTab.id);
           setStatus(`✓ Loaded: ${newTab.name}`);
+          
+          // Add to recent files
+          window.electronAPI.addRecentFile(filePath).catch(error => {
+            console.error('Failed to add to recent files:', error);
+          });
         } else {
           setStatus(`✗ Error: ${result?.error || 'Unknown error'}`);
         }
@@ -2018,6 +2147,7 @@ function App() {
   }, [isResizing, resizeStartX, resizeStartWidth]);
 
   return React.createElement('div', {
+    className: 'app-container',
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -2028,22 +2158,20 @@ function App() {
     
     // Tab bar
     React.createElement('div', {
+      className: 'tab-bar',
       style: {
         display: 'flex',
-        backgroundColor: '#f0f0f0',
-        borderBottom: '1px solid #ddd',
         overflowX: 'auto',
         minHeight: '36px'
       }
     }, tabs.map(tab => 
       React.createElement('div', {
         key: tab.id,
+        className: `tab ${tab.id === activeTabId ? 'active' : ''}`,
         style: {
           display: 'flex',
           alignItems: 'center',
           padding: '8px 10px',
-          borderRight: '1px solid #e0e0e0',
-          backgroundColor: tab.id === activeTabId ? '#ffffff' : '#f0f0f0',
           cursor: 'pointer',
           minWidth: '120px',
           maxWidth: '200px'
@@ -2067,7 +2195,7 @@ function App() {
             background: 'none',
             cursor: 'pointer',
             fontSize: '12px',
-            color: '#666'
+            color: 'var(--text-secondary)'
           },
           onClick: (e) => {
             e.stopPropagation();
@@ -2092,20 +2220,18 @@ function App() {
     },
       // File Explorer (left sidebar)
       currentFolder && isExplorerVisible && React.createElement('div', {
+        className: 'sidebar',
         style: {
           width: `${explorerWidth}px`,
-          backgroundColor: '#fafafa',
           display: 'flex',
           flexDirection: 'column'
         }
       },
         React.createElement('div', {
+          className: 'sidebar-header',
           style: {
             padding: '5px 10px',
-            backgroundColor: '#f0f0f0',
-            borderBottom: '1px solid #ddd',
             fontSize: '12px',
-            color: '#666',
             fontWeight: 'bold',
             display: 'flex',
             justifyContent: 'space-between',
@@ -2152,7 +2278,9 @@ function App() {
           style: {
             width: isPreviewVisible ? `${editorWidth}%` : '100%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            minWidth: 0,
+            overflow: 'hidden'
           }
         },
           React.createElement('div', {
@@ -2199,16 +2327,34 @@ function App() {
               }, isPreviewVisible ? '👁️‍🗨️' : '👁️')
             )
           ),
-          React.createElement(Editor, {
-            content: currentTab.content,
-            onChange: handleContentChange,
-            onScroll: handleScroll,
-            scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
-            onFormat: (handler) => {
-              console.log('Setting editor format handler');
-              editorFormatHandlerRef.current = handler;
+          React.createElement('div', {
+            style: { 
+              position: 'relative', 
+              height: '100%', 
+              overflow: 'hidden',
+              flex: 1
             }
-          })
+          },
+            React.createElement(Editor, {
+              content: currentTab.content,
+              onChange: handleContentChange,
+              onScroll: handleScroll,
+              scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
+              onFormat: (handler) => {
+                console.log('Setting editor format handler');
+                editorFormatHandlerRef.current = handler;
+              },
+              onShowFindReplace: handleShowFindReplace,
+              editorRef: editorTextareaRef,
+              isFindReplaceOpen: showFindReplace
+            }),
+            React.createElement(FindReplace, {
+              isOpen: showFindReplace,
+              onClose: () => setShowFindReplace(false),
+              textareaRef: editorTextareaRef,
+              onContentChange: handleContentChange
+            })
+          )
         ),
         
         // Splitter between editor and preview
@@ -2222,7 +2368,9 @@ function App() {
           style: {
             width: `${100 - editorWidth}%`,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            minWidth: 0,
+            overflow: 'hidden'
           }
         },
           React.createElement('div', {
@@ -2262,12 +2410,10 @@ function App() {
     
     // Status bar (bottom)
     React.createElement('div', {
+      className: 'status-bar',
       style: {
         padding: '5px 15px',
-        backgroundColor: '#e8e8e8',
-        borderTop: '1px solid #ccc',
         fontSize: '12px',
-        color: '#666',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -2296,6 +2442,11 @@ function App() {
       onClose: () => setShowTemplateDialog(false),
       templates: templates,
       onSelect: handleTemplateSelect
+    }),
+    
+    React.createElement(AboutDialog, {
+      isOpen: showAboutDialog,
+      onClose: () => setShowAboutDialog(false)
     })
   );
 }

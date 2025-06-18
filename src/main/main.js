@@ -108,7 +108,10 @@ function createWindow() {
 }
 
 // Create application menu
-function createMenu() {
+async function createMenu() {
+  // Get recent files and folders
+  const recentFiles = await preferencesManager.getRecentFiles();
+  const recentFolders = await preferencesManager.getRecentFolders();
   const template = [
     {
       label: 'File',
@@ -165,6 +168,10 @@ function createMenu() {
             if (!result.canceled && result.filePaths.length > 0) {
               console.log('Sending file path to renderer:', result.filePaths[0]);
               mainWindow.webContents.send('menu-open-file', result.filePaths[0]);
+              
+              // Add to recent files
+              await preferencesManager.addRecentFile(result.filePaths[0]);
+              await createMenu(); // Rebuild menu to show updated recent files
             }
           }
         },
@@ -191,8 +198,77 @@ function createMenu() {
             if (!result.canceled && result.filePaths.length > 0) {
               console.log('Sending folder path to renderer:', result.filePaths[0]);
               mainWindow.webContents.send('menu-open-folder', result.filePaths[0]);
+              
+              // Add to recent folders
+              await preferencesManager.addRecentFolder(result.filePaths[0]);
+              await createMenu(); // Rebuild menu to show updated recent folders
             }
           }
+        },
+        { type: 'separator' },
+        {
+          label: 'Recent Files',
+          submenu: recentFiles.length > 0 ? [
+            ...recentFiles.map(filePath => ({
+              label: path.basename(filePath),
+              sublabel: path.dirname(filePath),
+              click: async () => {
+                console.log('Opening recent file:', filePath);
+                
+                // Create window if none exists
+                if (!mainWindow || mainWindow.isDestroyed()) {
+                  mainWindow = createWindow();
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                // Send file path to renderer
+                mainWindow.webContents.send('menu-open-file', filePath);
+              }
+            })),
+            { type: 'separator' },
+            {
+              label: 'Clear Recent Files',
+              click: async () => {
+                await preferencesManager.clearRecentFiles();
+                // Rebuild menu
+                await createMenu();
+              }
+            }
+          ] : [
+            { label: 'No Recent Files', enabled: false }
+          ]
+        },
+        {
+          label: 'Recent Folders',
+          submenu: recentFolders.length > 0 ? [
+            ...recentFolders.map(folderPath => ({
+              label: path.basename(folderPath),
+              sublabel: path.dirname(folderPath),
+              click: async () => {
+                console.log('Opening recent folder:', folderPath);
+                
+                // Create window if none exists
+                if (!mainWindow || mainWindow.isDestroyed()) {
+                  mainWindow = createWindow();
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                // Send folder path to renderer
+                mainWindow.webContents.send('menu-open-folder', folderPath);
+              }
+            })),
+            { type: 'separator' },
+            {
+              label: 'Clear Recent Folders',
+              click: async () => {
+                await preferencesManager.clearRecentFolders();
+                // Rebuild menu
+                await createMenu();
+              }
+            }
+          ] : [
+            { label: 'No Recent Folders', enabled: false }
+          ]
         },
         { type: 'separator' },
         {
@@ -290,7 +366,34 @@ function createMenu() {
         { type: 'separator' },
         { label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
         { label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
-        { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' }
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' },
+        { type: 'separator' },
+        {
+          label: 'Find',
+          accelerator: 'CmdOrCtrl+F',
+          click: () => {
+            console.log('Find menu clicked');
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.send('menu-find');
+            } else if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('menu-find');
+            }
+          }
+        },
+        {
+          label: 'Replace',
+          accelerator: process.platform === 'darwin' ? 'Cmd+Option+F' : 'CmdOrCtrl+H',
+          click: () => {
+            console.log('Replace menu clicked');
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              focusedWindow.webContents.send('menu-replace');
+            } else if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('menu-replace');
+            }
+          }
+        }
       ]
     },
     {
@@ -327,6 +430,34 @@ function createMenu() {
         { type: 'separator' },
         { label: 'Toggle Fullscreen', accelerator: 'F11', role: 'togglefullscreen' }
       ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'About willisMD',
+          click: () => {
+            console.log('About menu clicked');
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              console.log('Sending menu-show-about to focused window');
+              focusedWindow.webContents.send('menu-show-about');
+            } else if (mainWindow && !mainWindow.isDestroyed()) {
+              console.log('Sending menu-show-about to main window');
+              mainWindow.webContents.send('menu-show-about');
+            } else {
+              console.log('No window available to show about dialog');
+            }
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'View Documentation',
+          click: () => {
+            require('electron').shell.openExternal('https://github.com/stacylacy/willisMD');
+          }
+        }
+      ]
     }
   ];
 
@@ -335,7 +466,19 @@ function createMenu() {
     template.unshift({
       label: 'willisMD',
       submenu: [
-        { label: 'About willisMD', role: 'about' },
+        { label: 'About willisMD', click: () => {
+          console.log('About menu clicked (macOS)');
+          const focusedWindow = BrowserWindow.getFocusedWindow();
+          if (focusedWindow) {
+            console.log('Sending menu-show-about to focused window (macOS)');
+            focusedWindow.webContents.send('menu-show-about');
+          } else if (mainWindow && !mainWindow.isDestroyed()) {
+            console.log('Sending menu-show-about to main window (macOS)');
+            mainWindow.webContents.send('menu-show-about');
+          } else {
+            console.log('No window available to show about dialog (macOS)');
+          }
+        }},
         { type: 'separator' },
         {
           label: 'Preferences...',
@@ -514,6 +657,48 @@ ipcMain.handle('export-docx', async (event, { markdown, title }) => {
   }
 });
 
+// Read About.md content
+ipcMain.handle('read-about-content', async () => {
+  try {
+    // When packaged, __dirname points to app.asar/src/main
+    // We need to go up to app.asar root and then to public
+    const aboutPath = app.isPackaged 
+      ? path.join(__dirname, '../../public/About.md')
+      : path.join(__dirname, '../../public/About.md');
+    
+    console.log('Reading About.md from:', aboutPath);
+    console.log('App is packaged:', app.isPackaged);
+    console.log('__dirname:', __dirname);
+    
+    const content = await fs.readFile(aboutPath, 'utf-8');
+    console.log('Successfully read About.md, length:', content.length);
+    return { success: true, content };
+  } catch (error) {
+    console.error('Failed to read About.md:', error);
+    console.error('Attempted path:', aboutPath);
+    
+    // Try alternative path for packaged app
+    if (app.isPackaged) {
+      try {
+        // Try reading from app.getAppPath()
+        const altPath = path.join(app.getAppPath(), 'public', 'About.md');
+        console.log('Trying alternative path:', altPath);
+        const content = await fs.readFile(altPath, 'utf-8');
+        console.log('Successfully read from alternative path');
+        return { success: true, content };
+      } catch (altError) {
+        console.error('Alternative path also failed:', altError);
+      }
+    }
+    
+    // Fallback content if file not found
+    return { 
+      success: true, 
+      content: '# About willisMD\n\nVersion 1.0.0\n\nA powerful markdown editor built with Electron and React.\n\nError: Could not load full About content.'
+    };
+  }
+});
+
 // Save confirmation dialog
 ipcMain.handle('show-save-confirmation', async (event, { fileName, hasUnsavedChanges }) => {
   if (!hasUnsavedChanges) {
@@ -592,6 +777,45 @@ ipcMain.handle('get-templates', async () => {
   }
 });
 
+// Recent files and folders handlers
+ipcMain.handle('get-recent-files', async () => {
+  try {
+    return await preferencesManager.getRecentFiles();
+  } catch (error) {
+    console.error('Failed to get recent files:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('get-recent-folders', async () => {
+  try {
+    return await preferencesManager.getRecentFolders();
+  } catch (error) {
+    console.error('Failed to get recent folders:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('add-recent-file', async (event, filePath) => {
+  try {
+    await preferencesManager.addRecentFile(filePath);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to add recent file:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('add-recent-folder', async (event, folderPath) => {
+  try {
+    await preferencesManager.addRecentFolder(folderPath);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to add recent folder:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // App event handlers
 app.whenReady().then(async () => {
   console.log('Electron app ready, creating window...');
@@ -600,7 +824,7 @@ app.whenReady().then(async () => {
   await preferencesManager.load();
   
   mainWindow = createWindow();
-  createMenu();
+  await createMenu();
 });
 
 // Handle app quit with save confirmation

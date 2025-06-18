@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "1.0.0",
+  "version": "0.6.0",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
@@ -13,9 +13,17 @@
     "build:electron": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["markdown", "editor", "electron", "react", "cross-platform"],
+  "author": "Stacy Lacy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stacylacy/willisMD.git"
+  },
+  "homepage": "https://github.com/stacylacy/willisMD",
+  "bugs": {
+    "url": "https://github.com/stacylacy/willisMD/issues"
+  },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
     "docx": "^9.5.1",
@@ -53,15 +61,44 @@
       "output": "build"
     },
     "files": [
-      "dist/index.html",
-      "dist/renderer.js",
-      "dist/renderer.js.LICENSE.txt",
+      "dist/**/*",
       "src/main/**/*",
       "src/preload/**/*",
+      "public/**/*",
+      "templates/**/*",
       "!node_modules/puppeteer/.local-chromium/**/*"
     ],
     "mac": {
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "icon": "public/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64", "x64"]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.ico",
+      "publisherName": "Stacy Lacy"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "icon": "public/icon.png"
     }
   }
 }
