@@ -344,6 +344,7 @@ function Preview({ content, onScroll, scrollToPercentage }) {
 // File Explorer Component
 function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
   const [folderContents, setFolderContents] = useState([]);
+  const [subfolderContents, setSubfolderContents] = useState(new Map());
   const [expandedFolders, setExpandedFolders] = useState(new Set());
   const [loading, setLoading] = useState(false);
   
@@ -370,12 +371,29 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
     setLoading(false);
   };
   
+  const loadSubfolderContents = async (folderPath) => {
+    try {
+      const result = await window.electronAPI.readDirectory(folderPath);
+      if (result.success) {
+        setSubfolderContents(prev => new Map(prev.set(folderPath, result.items)));
+      } else {
+        console.error('Failed to read subdirectory:', result.error);
+      }
+    } catch (error) {
+      console.error('Error reading subdirectory:', error);
+    }
+  };
+  
   const toggleFolder = async (folderPath) => {
     const newExpanded = new Set(expandedFolders);
     if (newExpanded.has(folderPath)) {
       newExpanded.delete(folderPath);
     } else {
       newExpanded.add(folderPath);
+      // Load the folder contents if not already loaded
+      if (!subfolderContents.has(folderPath)) {
+        await loadSubfolderContents(folderPath);
+      }
     }
     setExpandedFolders(newExpanded);
   };
@@ -385,10 +403,12 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
     return ext.endsWith('.md') || ext.endsWith('.markdown') || ext.endsWith('.txt');
   };
   
-  const renderItem = (item) => {
+  const renderItem = (item, depth = 0) => {
     const isExpanded = expandedFolders.has(item.path);
+    const paddingLeft = 8 + (depth * 16);
     
     if (item.isDirectory) {
+      const contents = subfolderContents.get(item.path) || [];
       return React.createElement('div', {
         key: item.path,
         style: { marginBottom: '2px' }
@@ -397,7 +417,7 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
           style: {
             display: 'flex',
             alignItems: 'center',
-            padding: '4px 8px',
+            padding: `4px ${paddingLeft}px`,
             cursor: 'pointer',
             fontSize: '13px',
             color: '#333',
@@ -418,7 +438,12 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
             style: { marginRight: '6px' }
           }, '📁'),
           React.createElement('span', null, item.name)
-        )
+        ),
+        
+        // Render subfolder contents if expanded
+        isExpanded && contents.length > 0 && React.createElement('div', {
+          style: { marginLeft: '8px' }
+        }, contents.map(subItem => renderItem(subItem, depth + 1)))
       );
     } else if (item.isFile && isMarkdownFile(item.name)) {
       return React.createElement('div', {
@@ -426,7 +451,7 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
         style: {
           display: 'flex',
           alignItems: 'center',
-          padding: '4px 8px 4px 24px',
+          padding: `4px ${paddingLeft + 16}px`,
           cursor: 'pointer',
           fontSize: '13px',
           color: '#333',
