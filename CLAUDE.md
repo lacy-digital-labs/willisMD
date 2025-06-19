@@ -38,6 +38,7 @@ The project has been initialized with a working Electron + React application. Th
 10. ✅ Preferences/settings window with persistence
 11. ✅ Find and replace functionality with regex support
 12. ✅ Recent files and folders menu
+13. ✅ Themes (light/dark mode)
 
 ## Features to Implement
 
@@ -48,10 +49,9 @@ The project has been initialized with a working Electron + React application. Th
    - Footnotes
    - Math equations (LaTeX)
    - Mermaid diagrams
-3. Themes (light/dark mode)
-4. Plugin system for extensibility
-5. Keyboard shortcuts for all menu actions
-6. Better editor with CodeMirror or Monaco Editor
+3. Plugin system for extensibility
+4. Keyboard shortcuts for all menu actions
+5. Better editor with CodeMirror or Monaco Editor
 
 ## Development Commands
 
@@ -114,5 +114,4 @@ src/
 2. The editor is a basic textarea - could benefit from CodeMirror or Monaco Editor for advanced features
 3. Keyboard shortcuts only implemented for basic actions (more could be added)
 4. Multi-window support not implemented
-5. Theme switching (light/dark mode) not yet implemented
-6. No plugin system for extensibility
+5. No plugin system for extensibility

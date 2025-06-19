@@ -14,7 +14,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["markdown", "editor", "electron", "react", "cross-platform"],
-  "author": "Stacy Lacy",
+  "author": {
+    "name": "Stacy Lacy",
+    "email": "stacy@example.com"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -89,8 +92,7 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "public/icon.ico",
-      "publisherName": "Stacy Lacy"
+      "icon": "public/icon.ico"
     },
     "linux": {
       "target": [
