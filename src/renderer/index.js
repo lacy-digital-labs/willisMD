@@ -409,9 +409,8 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
     
     if (item.isDirectory) {
       const contents = subfolderContents.get(item.path) || [];
-      return React.createElement('div', {
-        key: item.path,
-        style: { marginBottom: '2px' }
+      return React.createElement(React.Fragment, {
+        key: item.path
       },
         // Folder header
         React.createElement('div', {
@@ -422,7 +421,8 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
             cursor: 'pointer',
             fontSize: '13px',
             color: '#333',
-            borderRadius: '3px'
+            borderRadius: '3px',
+            marginBottom: '2px'
           },
           onClick: () => toggleFolder(item.path),
           onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
@@ -512,7 +512,7 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
             padding: '20px'
           }
         }, 'Loading...') :
-        folderContents.map(renderItem)
+        folderContents.map(item => renderItem(item, 0))
     )
   );
 }
