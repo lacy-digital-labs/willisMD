@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
@@ -13,7 +13,13 @@
     "build:electron": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["markdown", "editor", "electron", "react", "cross-platform"],
+  "keywords": [
+    "markdown",
+    "editor",
+    "electron",
+    "react",
+    "cross-platform"
+  ],
   "author": {
     "name": "Stacy Lacy",
     "email": "stacy@example.com"
@@ -77,11 +83,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ]
     },
@@ -89,7 +101,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "public/icon.ico"
