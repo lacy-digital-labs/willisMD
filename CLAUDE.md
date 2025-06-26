@@ -51,7 +51,14 @@ The project has been initialized with a working Electron + React application. Th
    - Mermaid diagrams
 3. Plugin system for extensibility
 4. Keyboard shortcuts for all menu actions
-5. Better editor with CodeMirror or Monaco Editor
+2. Implement live markdown preview in editor (inline)
+3. Add autocompletion for markdown syntax
+4. Add bracket matching for markdown links
+5. Implement code block syntax highlighting
+1. Add vim/emacs keybindings option
+3. Add markdown linting
+4. Custom themes matching app themes
+
 
 ## Development Commands
 

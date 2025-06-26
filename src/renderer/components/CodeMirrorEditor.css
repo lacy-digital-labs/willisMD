@@ -1,0 +1,134 @@
+.codemirror-editor {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-container {
+  flex: 1;
+  overflow: auto;
+  height: 100%;
+}
+
+/* Override CodeMirror default styles to match our theme */
+.cm-editor {
+  height: 100%;
+}
+
+.cm-scroller {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  line-height: 1.5;
+}
+
+/* Markdown syntax highlighting */
+.cm-header {
+  font-weight: bold;
+}
+
+.cm-header-1 {
+  font-size: 2em;
+}
+
+.cm-header-2 {
+  font-size: 1.5em;
+}
+
+.cm-header-3 {
+  font-size: 1.17em;
+}
+
+.cm-header-4 {
+  font-size: 1em;
+}
+
+.cm-header-5 {
+  font-size: 0.83em;
+}
+
+.cm-header-6 {
+  font-size: 0.67em;
+}
+
+.cm-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.cm-link {
+  color: #0366d6;
+  text-decoration: underline;
+}
+
+.cm-url {
+  color: #0366d6;
+}
+
+.cm-emphasis {
+  font-style: italic;
+}
+
+.cm-strong {
+  font-weight: bold;
+}
+
+.cm-strikethrough {
+  text-decoration: line-through;
+}
+
+/* Code blocks */
+.cm-codeblock {
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+}
+
+/* Lists */
+.cm-list {
+  color: #d73a49;
+}
+
+/* Ensure the editor takes full height */
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+/* Match the app's scrollbar style */
+.cm-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.cm-scroller::-webkit-scrollbar-track {
+  background: var(--bg-secondary, #f8f8f8);
+}
+
+.cm-scroller::-webkit-scrollbar-thumb {
+  background: var(--border-medium, #ccc);
+  border-radius: 4px;
+}
+
+.cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--border-dark, #999);
+}
+
+/* Theme-aware styles */
+.cm-editor {
+  background-color: var(--editor-bg);
+  color: var(--editor-text);
+}
+
+.cm-gutters {
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+.cm-activeLineGutter {
+  background-color: var(--bg-accent);
+}
+
+.cm-cursor {
+  border-left-color: var(--text-primary);
+}

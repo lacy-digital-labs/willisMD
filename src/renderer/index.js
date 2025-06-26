@@ -5,6 +5,7 @@ import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
 import AboutDialog from './components/AboutDialog';
 import FindReplace from './components/FindReplace';
+import CodeMirrorEditor from './components/CodeMirrorEditor';
 import './styles.css';
 import './themes.css';
 
@@ -1167,6 +1168,42 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             }
           })
         )
+      ),
+      
+      // Advanced Editor Setting
+      React.createElement('div', {
+        style: { marginBottom: '20px' }
+      },
+        React.createElement('label', {
+          style: { 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: '8px' 
+          }
+        },
+          React.createElement('input', {
+            type: 'checkbox',
+            checked: localPrefs.useCodeMirror || false,
+            onChange: (e) => setLocalPrefs(prev => ({
+              ...prev,
+              useCodeMirror: e.target.checked
+            }))
+          }),
+          React.createElement('span', { 
+            style: { 
+              fontWeight: 'bold',
+              color: 'var(--text-primary)'
+            } 
+          }, 'Use Advanced Editor (CodeMirror)')
+        ),
+        React.createElement('div', {
+          style: { 
+            marginTop: '4px', 
+            marginLeft: '26px',
+            fontSize: '12px',
+            color: 'var(--text-muted)'
+          }
+        }, 'Enable syntax highlighting, better indentation, and advanced editing features')
       ),
       
       // Action Buttons
@@ -2359,19 +2396,27 @@ function App() {
               flex: 1
             }
           },
-            React.createElement(Editor, {
-              content: currentTab.content,
-              onChange: handleContentChange,
-              onScroll: handleScroll,
-              scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
-              onFormat: (handler) => {
-                console.log('Setting editor format handler');
-                editorFormatHandlerRef.current = handler;
-              },
-              onShowFindReplace: handleShowFindReplace,
-              editorRef: editorTextareaRef,
-              isFindReplaceOpen: showFindReplace
-            }),
+            preferences.useCodeMirror ? 
+              React.createElement(CodeMirrorEditor, {
+                content: currentTab.content,
+                onChange: handleContentChange,
+                theme: preferences.theme || 'light',
+                onScroll: handleScroll,
+                scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null
+              }) :
+              React.createElement(Editor, {
+                content: currentTab.content,
+                onChange: handleContentChange,
+                onScroll: handleScroll,
+                scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
+                onFormat: (handler) => {
+                  console.log('Setting editor format handler');
+                  editorFormatHandlerRef.current = handler;
+                },
+                onShowFindReplace: handleShowFindReplace,
+                editorRef: editorTextareaRef,
+                isFindReplaceOpen: showFindReplace
+              }),
             React.createElement(FindReplace, {
               isOpen: showFindReplace,
               onClose: () => setShowFindReplace(false),
