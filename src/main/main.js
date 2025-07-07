@@ -718,6 +718,85 @@ ipcMain.handle('show-save-confirmation', async (event, { fileName, hasUnsavedCha
   return { action: actions[result.response] };
 });
 
+// Generic message box dialog
+ipcMain.handle('show-message-box', async (event, options) => {
+  const result = await dialog.showMessageBox(mainWindow, options);
+  return result;
+});
+
+// File system operations
+ipcMain.handle('duplicate-file', async (event, sourcePath, targetPath) => {
+  try {
+    const fs = require('fs').promises;
+    
+    // If no target path provided, create one with (copy) suffix
+    if (!targetPath) {
+      const path = require('path');
+      const dir = path.dirname(sourcePath);
+      const ext = path.extname(sourcePath);
+      const baseName = path.basename(sourcePath, ext);
+      
+      // Find a unique name
+      let copyNum = 1;
+      let newPath;
+      do {
+        const suffix = copyNum === 1 ? ' (copy)' : ` (copy ${copyNum})`;
+        newPath = path.join(dir, `${baseName}${suffix}${ext}`);
+        copyNum++;
+      } while (await fs.access(newPath).then(() => true).catch(() => false));
+      
+      targetPath = newPath;
+    }
+    
+    await fs.copyFile(sourcePath, targetPath);
+    return { success: true, path: targetPath };
+  } catch (error) {
+    console.error('Failed to duplicate file:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-folder', async (event, folderPath) => {
+  try {
+    const fs = require('fs').promises;
+    await fs.mkdir(folderPath, { recursive: true });
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to create folder:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-item', async (event, itemPath) => {
+  try {
+    const fs = require('fs').promises;
+    const stats = await fs.stat(itemPath);
+    
+    if (stats.isDirectory()) {
+      // Use rm with recursive for directories in newer Node.js
+      await fs.rm(itemPath, { recursive: true, force: true });
+    } else {
+      await fs.unlink(itemPath);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete item:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('rename-item', async (event, oldPath, newPath) => {
+  try {
+    const fs = require('fs').promises;
+    await fs.rename(oldPath, newPath);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to rename item:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // Preferences handlers
 ipcMain.handle('preferences-load', async () => {
   try {

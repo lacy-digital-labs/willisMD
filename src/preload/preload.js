@@ -17,6 +17,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Save confirmation operations
   showSaveConfirmation: (data) => ipcRenderer.invoke('show-save-confirmation', data),
+  showMessageBox: (options) => ipcRenderer.invoke('show-message-box', options),
+  
+  // File system operations
+  duplicateFile: (sourcePath, targetPath) => ipcRenderer.invoke('duplicate-file', sourcePath, targetPath),
+  createFolder: (folderPath) => ipcRenderer.invoke('create-folder', folderPath),
+  deleteItem: (itemPath) => ipcRenderer.invoke('delete-item', itemPath),
+  renameItem: (oldPath, newPath) => ipcRenderer.invoke('rename-item', oldPath, newPath),
   
   // Preferences operations
   preferencesLoad: () => ipcRenderer.invoke('preferences-load'),

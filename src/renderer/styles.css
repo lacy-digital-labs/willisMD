@@ -186,3 +186,35 @@
 [data-theme="dark"] .markdown-hr {
   color: #666;
 }
+
+/* Wiki Link Styles */
+.wiki-link {
+  color: #0066cc;
+  text-decoration: none;
+  border-bottom: 1px dashed #0066cc;
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.wiki-link:hover {
+  background-color: #e6f3ff;
+  border-bottom: 1px solid #0066cc;
+  text-decoration: none;
+}
+
+.wiki-link:active {
+  background-color: #cce6ff;
+}
+
+/* Dark theme wiki links */
+[data-theme="dark"] .wiki-link {
+  color: #66b3ff;
+  border-bottom-color: #66b3ff;
+}
+
+[data-theme="dark"] .wiki-link:hover {
+  background-color: rgba(102, 179, 255, 0.1);
+  border-bottom-color: #66b3ff;
+}

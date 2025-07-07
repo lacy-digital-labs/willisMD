@@ -1,6 +1,6 @@
 # About willisMD
 
-## Version 0.5.0
+## Version 0.8.0
 
 willisMD is a cross-platform markdown editor designed to make writing and editing markdown documents a seamless experience. Built with modern web technologies and packaged as a desktop application, it combines the simplicity of markdown with the convenience of a native editor.
 
@@ -11,6 +11,7 @@ willisMD is a cross-platform markdown editor designed to make writing and editin
 - **Split-Pane View**: Edit and preview side-by-side for optimal workflow
 - **Multi-Tab Support**: Work on multiple documents simultaneously
 - **Syntax Highlighting**: Color-coded markdown syntax for better readability
+- **Wiki Links Suport**: Supports [[link]] format for editing wiki style.
 
 ### 📁 File Management
 - **Native File Operations**: Open, save, and create files with familiar keyboard shortcuts
@@ -22,19 +23,6 @@ willisMD is a cross-platform markdown editor designed to make writing and editin
 - **Toolbar Support**: Quick access to common markdown formatting
 - **Multiple Export Formats**: Export to HTML, PDF, and DOCX
 - **Clean, Readable Output**: Professional document rendering
-
-### 🚀 Performance
-- **Fast Startup**: Optimized for quick launch times
-- **Efficient Rendering**: Smooth typing and preview updates
-- **Lightweight**: Minimal resource usage
-
-## Technology
-
-willisMD is built with:
-- **Electron**: For cross-platform desktop support
-- **React**: For a responsive, modern user interface
-- **Marked**: For fast, reliable markdown parsing
-- **DOMPurify**: For secure HTML rendering
 
 ## Keyboard Shortcuts
 
@@ -72,9 +60,9 @@ Special thanks to:
 willisMD is open-source software. See the LICENSE file for details.
 
 ## Support
+willisMD is built to provide a simple, cross-platform markdown editor.  It is in its early days and is provided as-is, make sure to backup your files, and treat this as pre-beta software.
 
-- **Documentation**: Visit GitHub at https://github.com/stacylacy/willisMD.
-- **Community**: Join our discussions and share your feedback
+- **Documentation**: Visit GitHub at https://github.com/lacydigitallabs/willisMD.
 
 ---
 

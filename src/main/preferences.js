@@ -17,8 +17,7 @@ class PreferencesManager {
       showLineNumbers: false,
       tabSize: 2,
       recentFiles: [], // recently opened files
-      recentFolders: [], // recently opened folders
-      useCodeMirror: false // feature flag for CodeMirror editor
+      recentFolders: [] // recently opened folders
     };
     this.preferences = { ...this.defaultPreferences };
     this.loaded = false;

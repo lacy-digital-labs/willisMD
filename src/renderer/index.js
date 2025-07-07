@@ -4,307 +4,87 @@ import { marked } from 'marked';
 import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
 import AboutDialog from './components/AboutDialog';
-import FindReplace from './components/FindReplace';
 import CodeMirrorEditor from './components/CodeMirrorEditor';
 import './styles.css';
 import './themes.css';
 
-// Enhanced Editor Component with undo/redo support and scroll sync
-function Editor({ content, onChange, onScroll, scrollToPercentage, onFormat, onShowFindReplace, editorRef, isFindReplaceOpen }) {
-  const textareaRef = useRef(null);
-  
-  // Expose textarea ref to parent
-  useEffect(() => {
-    if (editorRef) {
-      editorRef.current = textareaRef.current;
-    }
-  }, [editorRef]);
-  
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    
-    // Handle keyboard shortcuts
-    const handleKeyDown = (e) => {
-      // Cmd/Ctrl+Z for undo
-      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
-        // Let the browser handle native undo
-        return;
-      }
-      
-      // Cmd/Ctrl+Shift+Z or Cmd/Ctrl+Y for redo
-      if ((e.metaKey || e.ctrlKey) && (
-        (e.key === 'z' && e.shiftKey) || 
-        (e.key === 'y' && !e.shiftKey)
-      )) {
-        // Let the browser handle native redo
-        return;
-      }
-      
-      // Formatting shortcuts
-      if (e.metaKey || e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-          case 'b':
-            e.preventDefault();
-            handleFormat('bold');
-            break;
-          case 'i':
-            e.preventDefault();
-            handleFormat('italic');
-            break;
-          case 'k':
-            e.preventDefault();
-            handleFormat('link');
-            break;
-          case 'f':
-            if (!isFindReplaceOpen) {
-              e.preventDefault();
-              onShowFindReplace && onShowFindReplace(false); // Show find only
-            }
-            break;
-          case 'h':
-            if ((e.metaKey || e.ctrlKey) && !isFindReplaceOpen) {
-              e.preventDefault();
-              onShowFindReplace && onShowFindReplace(true); // Show find and replace
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    };
-    
-    textarea.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      textarea.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-  
-  // Handle external scroll requests (from preview)
-  useEffect(() => {
-    if (scrollToPercentage !== null && textareaRef.current) {
-      const element = textareaRef.current;
-      const scrollTop = scrollToPercentage * (element.scrollHeight - element.clientHeight);
-      element.scrollTop = scrollTop;
-    }
-  }, [scrollToPercentage]);
-  
-  const handleScrollEvent = (e) => {
-    if (onScroll) {
-      const element = e.target;
-      const scrollPercentage = element.scrollTop / (element.scrollHeight - element.clientHeight);
-      onScroll(scrollPercentage, 'editor');
-    }
-  };
-  
-  // Handle formatting from toolbar or keyboard shortcuts
-  const handleFormat = (action, ...args) => {
-    console.log('Editor handleFormat called with action:', action, 'args:', args);
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      console.log('No textarea ref available');
-      return;
-    }
-    
-    let result;
-    
-    switch (action) {
-      case 'bold':
-        result = MarkdownUtils.formatBold(textarea);
-        break;
-      case 'italic':
-        result = MarkdownUtils.formatItalic(textarea);
-        break;
-      case 'strikethrough':
-        result = MarkdownUtils.formatStrikethrough(textarea);
-        break;
-      case 'code':
-        result = MarkdownUtils.formatCode(textarea);
-        break;
-      case 'codeblock':
-        result = MarkdownUtils.formatCodeBlock(textarea);
-        break;
-      case 'h1':
-        result = MarkdownUtils.formatH1(textarea);
-        break;
-      case 'h2':
-        result = MarkdownUtils.formatH2(textarea);
-        break;
-      case 'h3':
-        result = MarkdownUtils.formatH3(textarea);
-        break;
-      case 'ul':
-        result = MarkdownUtils.formatUnorderedList(textarea);
-        break;
-      case 'ol':
-        result = MarkdownUtils.formatOrderedList(textarea);
-        break;
-      case 'quote':
-        result = MarkdownUtils.formatQuote(textarea);
-        break;
-      case 'link':
-        result = MarkdownUtils.formatLink(textarea);
-        break;
-      case 'image':
-        result = MarkdownUtils.formatImage(textarea);
-        break;
-      case 'table':
-        result = MarkdownUtils.formatTable(textarea);
-        break;
-      case 'insert-table':
-        result = MarkdownUtils.insertTable(textarea, 3, 3);
-        break;
-      case 'insert-table-size':
-        // Extract rows and cols from additional arguments
-        const rows = args[0] || 3;
-        const cols = args[1] || 3;
-        result = MarkdownUtils.insertTable(textarea, rows, cols);
-        break;
-      case 'table-add-row-after':
-        result = MarkdownUtils.addTableRow(textarea, 'after');
-        break;
-      case 'table-add-row-before':
-        result = MarkdownUtils.addTableRow(textarea, 'before');
-        break;
-      case 'table-delete-row':
-        result = MarkdownUtils.deleteTableRow(textarea);
-        break;
-      case 'table-add-column-after':
-        result = MarkdownUtils.addTableColumn(textarea, 'after');
-        break;
-      case 'table-add-column-before':
-        result = MarkdownUtils.addTableColumn(textarea, 'before');
-        break;
-      case 'table-delete-column':
-        result = MarkdownUtils.deleteTableColumn(textarea);
-        break;
-      case 'table-align-left':
-        result = MarkdownUtils.setColumnAlignment(textarea, 'left');
-        break;
-      case 'table-align-center':
-        result = MarkdownUtils.setColumnAlignment(textarea, 'center');
-        break;
-      case 'table-align-right':
-        result = MarkdownUtils.setColumnAlignment(textarea, 'right');
-        break;
-      case 'hr':
-        result = MarkdownUtils.formatHorizontalRule(textarea);
-        break;
-      default:
-        return;
-    }
-    
-    console.log('Format result:', result);
-    if (result) {
-      console.log('Updating content with:', result.content.substring(0, 100), '...');
-      
-      // Get the current state
-      const originalValue = textarea.value;
-      const originalStart = textarea.selectionStart;
-      const originalEnd = textarea.selectionEnd;
-      
-      // Focus the textarea only if find/replace is not open
-      if (!isFindReplaceOpen) {
-        textarea.focus();
-      }
-      
-      // Method 1: Try to use execCommand for simple selection replacements
-      if (originalStart !== originalEnd || action === 'bold' || action === 'italic' || 
-          action === 'strikethrough' || action === 'code' || action === 'link' || action === 'image') {
-        
-        // Calculate what text to insert
-        const beforeSelection = originalValue.substring(0, originalStart);
-        const afterSelection = originalValue.substring(originalEnd);
-        const newContent = result.content;
-        
-        // Find what was actually inserted
-        if (newContent.startsWith(beforeSelection) && newContent.endsWith(afterSelection)) {
-          const insertedText = newContent.substring(beforeSelection.length, newContent.length - afterSelection.length);
-          
-          // Select the original range
-          textarea.setSelectionRange(originalStart, originalEnd);
-          
-          // Use execCommand to replace selection
-          if (document.execCommand('insertText', false, insertedText)) {
-            // Success! The undo stack is preserved
-            console.log('Successfully used execCommand for undo/redo support');
-          } else {
-            // Fallback
-            textarea.value = result.content;
-            onChange(result.content);
-          }
-        } else {
-          // For complex operations, use the fallback
-          textarea.value = result.content;
-          onChange(result.content);
-        }
-      } else {
-        // For operations that modify the whole line or document structure
-        textarea.value = result.content;
-        onChange(result.content);
-      }
-      
-      // Set cursor position after React updates
-      setTimeout(() => {
-        textarea.setSelectionRange(result.cursorPos, result.cursorPos);
-        if (!isFindReplaceOpen) {
-          textarea.focus();
-        }
-      }, 0);
-    } else {
-      console.log('No result from formatting function');
-    }
-  };
-  
-  // Expose format handler to parent
-  useEffect(() => {
-    console.log('Editor: Setting up format handler', typeof onFormat);
-    if (onFormat && typeof onFormat === 'function') {
-      console.log('Editor: Calling onFormat with handler');
-      onFormat(handleFormat);
-    }
-  }, [onFormat]);
-  
-  return React.createElement('textarea', {
-    ref: textareaRef,
-    className: 'editor',
-    style: {
-      width: '100%',
-      height: '100%',
-      padding: '15px',
-      border: 'none',
-      outline: 'none',
-      fontFamily: 'Monaco, "SF Mono", Consolas, monospace',
-      fontSize: '14px',
-      lineHeight: '1.6',
-      resize: 'none',
-      backgroundColor: 'var(--editor-bg)',
-      color: 'var(--editor-text)',
-      boxSizing: 'border-box',
-      minWidth: 0 // Prevent flex shrinking issues
-    },
-    value: content || '',
-    onChange: (e) => onChange(e.target.value),
-    onScroll: handleScrollEvent,
-    placeholder: 'Start typing your markdown here...',
-    spellCheck: false
-  });
-}
 
-// Preview Component with scroll sync support
-function Preview({ content, onScroll, scrollToPercentage }) {
+// Preview Component with scroll sync support and debounced rendering
+function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWikiLinkClick }) {
   const previewRef = useRef(null);
+  const [debouncedContent, setDebouncedContent] = useState(content);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const renderTimeoutRef = useRef(null);
   
-  const renderMarkdown = (markdown) => {
-    if (!markdown) return 'Preview will appear here...';
+  // Debounce content updates for better performance
+  useEffect(() => {
+    // Clear any existing timeout
+    if (renderTimeoutRef.current) {
+      clearTimeout(renderTimeoutRef.current);
+    }
+    
+    // Show updating indicator if content changed
+    if (content !== debouncedContent) {
+      setIsUpdating(true);
+    }
+    
+    // Set a new timeout for updating the preview
+    renderTimeoutRef.current = setTimeout(() => {
+      // Use requestAnimationFrame for smooth updates
+      requestAnimationFrame(() => {
+        setDebouncedContent(content);
+        setIsUpdating(false);
+      });
+    }, 300); // 300ms delay
+    
+    // Cleanup on unmount or when content changes
+    return () => {
+      if (renderTimeoutRef.current) {
+        clearTimeout(renderTimeoutRef.current);
+      }
+    };
+  }, [content]);
+  
+  // Process wiki links in content
+  const processWikiLinks = (text) => {
+    if (!text) return text;
+    
+    // Regex to match [[filename]] patterns
+    const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+    
+    return text.replace(wikiLinkRegex, (match, filename) => {
+      // Clean the filename and create a clickable link
+      const cleanFilename = filename.trim();
+      return `<a href="#" class="wiki-link" data-filename="${cleanFilename}" onclick="event.preventDefault(); window.handleWikiLinkClick('${cleanFilename}')">${cleanFilename}</a>`;
+    });
+  };
+  
+  // Memoize the rendered HTML to avoid re-parsing on every render
+  const renderedHtml = React.useMemo(() => {
+    if (!debouncedContent) return 'Preview will appear here...';
     try {
-      return marked(markdown);
+      // Process wiki links first, then run through markdown
+      const processedContent = processWikiLinks(debouncedContent);
+      return marked(processedContent);
     } catch (error) {
       console.error('Markdown rendering error:', error);
       return 'Error rendering markdown...';
     }
-  };
+  }, [debouncedContent]);
+  
+  // Set up global wiki link click handler
+  useEffect(() => {
+    window.handleWikiLinkClick = (filename) => {
+      if (onWikiLinkClick) {
+        onWikiLinkClick(filename);
+      }
+    };
+    
+    // Cleanup
+    return () => {
+      delete window.handleWikiLinkClick;
+    };
+  }, [onWikiLinkClick]);
   
   // Handle external scroll requests (from editor)
   useEffect(() => {
@@ -338,16 +118,34 @@ function Preview({ content, onScroll, scrollToPercentage }) {
       minWidth: 0 // Prevent flex shrinking issues
     },
     onScroll: handleScrollEvent,
-    dangerouslySetInnerHTML: { __html: renderMarkdown(content) }
+    dangerouslySetInnerHTML: { __html: renderedHtml }
   });
 }
 
 // File Explorer Component
-function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
+const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderChange }, ref) => {
   const [folderContents, setFolderContents] = useState([]);
   const [subfolderContents, setSubfolderContents] = useState(new Map());
   const [expandedFolders, setExpandedFolders] = useState(new Set());
   const [loading, setLoading] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [showInputDialog, setShowInputDialog] = useState(null);
+  
+  // Internal refresh function
+  const refreshExplorer = () => {
+    if (currentFolder) {
+      loadFolderContents(currentFolder);
+      // Also refresh any expanded subfolders
+      expandedFolders.forEach(folderPath => {
+        loadSubfolderContents(folderPath);
+      });
+    }
+  };
+
+  // Expose refresh method to parent
+  React.useImperativeHandle(ref, () => ({
+    refresh: refreshExplorer
+  }), [currentFolder, expandedFolders]);
   
   useEffect(() => {
     if (currentFolder) {
@@ -404,6 +202,157 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
     return ext.endsWith('.md') || ext.endsWith('.markdown') || ext.endsWith('.txt');
   };
   
+  // Handle context menu
+  const handleContextMenu = (e, item) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      item: item
+    });
+  };
+  
+  // File operations
+  const handleDuplicateFile = async (filePath) => {
+    try {
+      const result = await window.electronAPI.duplicateFile(filePath);
+      if (result.success) {
+        console.log('File duplicated:', result.path);
+        // Refresh to show the new file
+        refreshExplorer();
+      } else {
+        console.error('Failed to duplicate file:', result.error);
+        alert(`Failed to duplicate file: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error duplicating file:', error);
+      alert(`Error duplicating file: ${error.message}`);
+    }
+    setContextMenu(null);
+  };
+  
+  const handleCreateNewFile = async (parentPath) => {
+    setContextMenu(null);
+    setShowInputDialog({
+      type: 'file',
+      parentPath: parentPath,
+      title: 'Create New File',
+      placeholder: 'Enter file name (e.g. document.md)'
+    });
+  };
+
+  const processFileCreation = async (parentPath, fileName) => {
+    if (!fileName) {
+      return;
+    }
+    
+    const filePath = `${parentPath}/${fileName}${fileName.endsWith('.md') ? '' : '.md'}`;
+    const content = `# ${fileName.replace(/\.md$/, '')}\n\n`;
+    
+    try {
+      // Actually create the file on disk
+      const result = await window.electronAPI.writeFile(filePath, content);
+      if (result.success) {
+        
+        // Create tab for the new file
+        const newTab = {
+          id: Date.now(),
+          name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
+          content: content,
+          path: filePath,
+          isDirty: false // File is saved, so not dirty
+        };
+        
+        // Notify parent component to add the tab
+        if (onFolderChange) {
+          onFolderChange('new-file', newTab);
+        }
+        
+        // Refresh to show the new file
+        refreshExplorer();
+      } else {
+        console.error('Failed to create file:', result.error);
+        alert(`Failed to create file: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating file:', error);
+      alert(`Error creating file: ${error.message}`);
+    }
+    
+    setContextMenu(null);
+  };
+  
+  const handleCreateFolder = async (parentPath) => {
+    setContextMenu(null);
+    setShowInputDialog({
+      type: 'folder',
+      parentPath: parentPath,
+      title: 'Create New Folder',
+      placeholder: 'Enter folder name'
+    });
+  };
+
+  const processFolderCreation = async (parentPath, folderName) => {
+    if (!folderName) {
+      return;
+    }
+    
+    const newFolderPath = `${parentPath}/${folderName}`;
+    try {
+      const result = await window.electronAPI.createFolder(newFolderPath);
+      if (result.success) {
+        // Refresh to show the new folder
+        refreshExplorer();
+      } else {
+        console.error('Failed to create folder:', result.error);
+        alert(`Failed to create folder: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      alert(`Error creating folder: ${error.message}`);
+    }
+    setContextMenu(null);
+  };
+  
+  const handleDeleteItem = async (item) => {
+    const itemType = item.isDirectory ? 'folder' : 'file';
+    const confirmResult = await window.electronAPI.showMessageBox({
+      type: 'warning',
+      buttons: ['Delete', 'Cancel'],
+      defaultId: 1,
+      cancelId: 1,
+      message: `Delete ${itemType}?`,
+      detail: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`
+    });
+    
+    if (confirmResult.response === 0) {
+      try {
+        const result = await window.electronAPI.deleteItem(item.path);
+        if (result.success) {
+          console.log('Item deleted:', item.path);
+          // Refresh to remove the deleted item
+          refreshExplorer();
+        } else {
+          console.error('Failed to delete item:', result.error);
+          alert(`Failed to delete ${itemType}: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        alert(`Error deleting ${itemType}: ${error.message}`);
+      }
+    }
+    setContextMenu(null);
+  };
+  
+  // Close context menu when clicking elsewhere
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    if (contextMenu) {
+      document.addEventListener('click', handleClick);
+      return () => document.removeEventListener('click', handleClick);
+    }
+  }, [contextMenu]);
+  
   const renderItem = (item, depth = 0) => {
     const isExpanded = expandedFolders.has(item.path);
     const paddingLeft = 8 + (depth * 16);
@@ -426,6 +375,7 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
             marginBottom: '2px'
           },
           onClick: () => toggleFolder(item.path),
+          onContextMenu: (e) => handleContextMenu(e, item),
           onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         },
@@ -459,6 +409,7 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
           marginBottom: '2px'
         },
         onClick: () => onFileClick(item.path),
+        onContextMenu: (e) => handleContextMenu(e, item),
         onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       },
@@ -477,9 +428,24 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
         padding: '15px',
         textAlign: 'center',
         color: '#666',
-        fontSize: '13px'
+        fontSize: '13px',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
       }
-    }, 'No folder selected\nUse File → Open Folder...');
+    }, 
+      React.createElement('div', {
+        style: { marginBottom: '10px', fontSize: '24px' }
+      }, '📁'),
+      React.createElement('div', {
+        style: { lineHeight: '1.5' }
+      }, 'No folder selected'),
+      React.createElement('div', {
+        style: { fontSize: '11px', marginTop: '8px', opacity: 0.8 }
+      }, 'Use File → Open Folder...')
+    );
   }
   
   return React.createElement('div', {
@@ -514,9 +480,209 @@ function FileExplorer({ currentFolder, onFileClick, onFolderChange }) {
           }
         }, 'Loading...') :
         folderContents.map(item => renderItem(item, 0))
+    ),
+    
+    // Context menu
+    contextMenu && React.createElement('div', {
+      style: {
+        position: 'fixed',
+        left: contextMenu.x,
+        top: contextMenu.y,
+        backgroundColor: '#fff',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        zIndex: 1000,
+        minWidth: '150px',
+        padding: '4px 0',
+        fontSize: '13px'
+      },
+      onClick: (e) => e.stopPropagation()
+    },
+      contextMenu.item.isDirectory ? [
+        React.createElement('div', {
+          key: 'new-file',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            handleCreateNewFile(contextMenu.item.path);
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📄 New File'),
+        React.createElement('div', {
+          key: 'new-folder',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            handleCreateFolder(contextMenu.item.path);
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📁 New Folder'),
+        React.createElement('div', {
+          key: 'separator',
+          style: {
+            height: '1px',
+            backgroundColor: '#eee',
+            margin: '4px 0'
+          }
+        }),
+        React.createElement('div', {
+          key: 'delete',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#d32f2f'
+          },
+          onClick: () => handleDeleteItem(contextMenu.item),
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#ffebee',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '🗑️ Delete Folder')
+      ] : [
+        React.createElement('div', {
+          key: 'duplicate',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => handleDuplicateFile(contextMenu.item.path),
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📋 Duplicate'),
+        React.createElement('div', {
+          key: 'separator',
+          style: {
+            height: '1px',
+            backgroundColor: '#eee',
+            margin: '4px 0'
+          }
+        }),
+        React.createElement('div', {
+          key: 'delete',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#d32f2f'
+          },
+          onClick: () => handleDeleteItem(contextMenu.item),
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#ffebee',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '🗑️ Delete File')
+      ]
+    ),
+    
+    // Input Dialog
+    showInputDialog && React.createElement('div', {
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2000
+      },
+      onClick: (e) => {
+        if (e.target === e.currentTarget) {
+          setShowInputDialog(null);
+        }
+      }
+    },
+      React.createElement('div', {
+        style: {
+          backgroundColor: '#fff',
+          padding: '20px',
+          borderRadius: '8px',
+          minWidth: '300px',
+          maxWidth: '400px'
+        }
+      },
+        React.createElement('h3', {
+          style: { margin: '0 0 15px 0', color: '#333' }
+        }, showInputDialog.title),
+        React.createElement('input', {
+          type: 'text',
+          placeholder: showInputDialog.placeholder,
+          autoFocus: true,
+          style: {
+            width: '100%',
+            padding: '8px 12px',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            fontSize: '14px',
+            marginBottom: '15px'
+          },
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const value = e.target.value.trim();
+              if (value) {
+                if (showInputDialog.type === 'file') {
+                  processFileCreation(showInputDialog.parentPath, value);
+                } else if (showInputDialog.type === 'folder') {
+                  processFolderCreation(showInputDialog.parentPath, value);
+                }
+              }
+              setShowInputDialog(null);
+            } else if (e.key === 'Escape') {
+              setShowInputDialog(null);
+            }
+          }
+        }),
+        React.createElement('div', {
+          style: {
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'flex-end'
+          }
+        },
+          React.createElement('button', {
+            onClick: () => setShowInputDialog(null),
+            style: {
+              padding: '6px 12px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: '#f5f5f5',
+              cursor: 'pointer'
+            }
+          }, 'Cancel'),
+          React.createElement('button', {
+            onClick: (e) => {
+              const input = e.target.parentElement.parentElement.querySelector('input');
+              const value = input.value.trim();
+              if (value) {
+                if (showInputDialog.type === 'file') {
+                  processFileCreation(showInputDialog.parentPath, value);
+                } else if (showInputDialog.type === 'folder') {
+                  processFolderCreation(showInputDialog.parentPath, value);
+                }
+              }
+              setShowInputDialog(null);
+            },
+            style: {
+              padding: '6px 12px',
+              border: '1px solid #007acc',
+              borderRadius: '4px',
+              backgroundColor: '#007acc',
+              color: '#fff',
+              cursor: 'pointer'
+            }
+          }, 'Create')
+        )
+      )
     )
   );
-}
+});
 
 // Splitter Component for resizing
 function Splitter({ onMouseDown, direction = 'vertical' }) {
@@ -1170,41 +1336,6 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
         )
       ),
       
-      // Advanced Editor Setting
-      React.createElement('div', {
-        style: { marginBottom: '20px' }
-      },
-        React.createElement('label', {
-          style: { 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: '8px' 
-          }
-        },
-          React.createElement('input', {
-            type: 'checkbox',
-            checked: localPrefs.useCodeMirror || false,
-            onChange: (e) => setLocalPrefs(prev => ({
-              ...prev,
-              useCodeMirror: e.target.checked
-            }))
-          }),
-          React.createElement('span', { 
-            style: { 
-              fontWeight: 'bold',
-              color: 'var(--text-primary)'
-            } 
-          }, 'Use Advanced Editor (CodeMirror)')
-        ),
-        React.createElement('div', {
-          style: { 
-            marginTop: '4px', 
-            marginLeft: '26px',
-            fontSize: '12px',
-            color: 'var(--text-muted)'
-          }
-        }, 'Enable syntax highlighting, better indentation, and advanced editing features')
-      ),
       
       // Action Buttons
       React.createElement('div', {
@@ -1402,8 +1533,6 @@ function App() {
   const [resizeStartX, setResizeStartX] = useState(0);
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
   
-  // Editor formatting state
-  const editorFormatHandlerRef = useRef(null);
   
   // Scroll synchronization state
   const [editorScrollPercentage, setEditorScrollPercentage] = useState(null);
@@ -1416,10 +1545,7 @@ function App() {
   const [templates, setTemplates] = useState([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
-  const [showFindReplace, setShowFindReplace] = useState(false);
   
-  // Editor ref for find/replace
-  const editorTextareaRef = useRef(null);
   
   // Get current tab
   const currentTab = tabs.find(tab => tab.id === activeTabId) || tabs[0];
@@ -1436,6 +1562,12 @@ function App() {
   // Use ref for tabs to access in callbacks
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
+  
+  // Editor ref for formatting functions
+  const editorRef = useRef(null);
+  
+  // File explorer ref for refresh
+  const fileExplorerRef = useRef(null);
   
   // Auto-save timer ref
   const autoSaveTimerRef = useRef(null);
@@ -1472,10 +1604,19 @@ function App() {
     console.log('App: Setting showAboutDialog to true');
   };
   
-  // Find/Replace handler
-  const handleShowFindReplace = (withReplace = false) => {
-    console.log('App: Show find/replace requested, withReplace:', withReplace);
-    setShowFindReplace(true);
+  // Formatting handler for Toolbar
+  const handleFormat = (action, ...args) => {
+    if (!editorRef.current || !editorRef.current.formatText) {
+      console.warn('Editor ref not available for formatting');
+      return;
+    }
+    
+    try {
+      editorRef.current.formatText(action, ...args);
+    } catch (error) {
+      console.error('Formatting error:', error);
+      setStatus(`✗ Formatting error: ${error.message}`);
+    }
   };
   
   const handleSavePreferences = async (newPreferences) => {
@@ -1603,6 +1744,10 @@ function App() {
               tab.id === current.id ? { ...tab, isDirty: false } : tab
             ));
             setStatus(`✓ Saved: ${current.name}`);
+            // Refresh file explorer to show updated file
+            if (fileExplorerRef.current) {
+              fileExplorerRef.current.refresh();
+            }
           } else {
             setStatus(`✗ Save failed: ${result.error}`);
           }
@@ -1638,6 +1783,10 @@ function App() {
               } : tab
             ));
             setStatus(`✓ Saved: ${dialogResult.filePath.split('/').pop()}`);
+            // Refresh file explorer to show new file
+            if (fileExplorerRef.current) {
+              fileExplorerRef.current.refresh();
+            }
           } else {
             setStatus(`✗ Save failed: ${saveResult.error}`);
           }
@@ -1875,8 +2024,6 @@ function App() {
       console.log('App: Registering onShowAbout listener');
       window.electronAPI.onShowAbout(handleShowAbout);
       console.log('App: onShowAbout listener registered');
-      window.electronAPI.onFind(() => handleShowFindReplace(false));
-      window.electronAPI.onReplace(() => handleShowFindReplace(true));
       window.electronAPI.onCheckUnsavedChanges(handleCheckUnsavedChanges);
       window.electronAPI.onSaveAllBeforeQuit(handleSaveAllBeforeQuit);
       console.log('App: All listeners registered');
@@ -1969,11 +2116,12 @@ function App() {
     loadPreferences();
   }, []);
 
-  const handleContentChange = (newContent) => {
+  const handleContentChange = React.useCallback((newContent) => {
+    // Use React 18's automatic batching for better performance
     setTabs(prev => prev.map(tab => 
       tab.id === activeTabId ? { ...tab, content: newContent, isDirty: true } : tab
     ));
-  };
+  }, [activeTabId]);
   
   const closeTab = async (tabId) => {
     const tabToClose = tabs.find(tab => tab.id === tabId);
@@ -2089,6 +2237,96 @@ function App() {
     }
   };
   
+  // Handle wiki link clicks
+  const handleWikiLinkClick = async (filename) => {
+    console.log('Wiki link clicked:', filename);
+    
+    // Get the directory of the current file
+    const currentTab = tabsRef.current.find(tab => tab.id === activeTabId);
+    if (!currentTab || !currentTab.path) {
+      setStatus('✗ Current file must be saved to resolve wiki links');
+      return;
+    }
+    
+    // Extract directory from current file path
+    const currentFileDir = currentTab.path.substring(0, currentTab.path.lastIndexOf('/'));
+    console.log('Current file directory:', currentFileDir);
+    
+    try {
+      // Try to resolve the filename to a full path
+      const resolvedPath = await resolveWikiLink(filename, currentFileDir);
+      
+      if (resolvedPath) {
+        // File exists, open it
+        handleExplorerFileClick(resolvedPath);
+      } else {
+        // File doesn't exist, ask if user wants to create it
+        const shouldCreate = await window.electronAPI.showMessageBox({
+          type: 'question',
+          buttons: ['Create File', 'Cancel'],
+          defaultId: 0,
+          message: `File "${filename}" not found`,
+          detail: `Would you like to create "${filename}.md" in the same directory as the current file?`
+        });
+        
+        if (shouldCreate.response === 0) {
+          // Create new file in the same directory as current file
+          const newFilePath = `${currentFileDir}/${filename}.md`;
+          const newTab = {
+            id: Date.now(),
+            name: `${filename}.md`,
+            content: `# ${filename}\n\n`,
+            path: newFilePath,
+            isDirty: true
+          };
+          setTabs(prev => [...prev, newTab]);
+          setActiveTabId(newTab.id);
+          setStatus(`✓ Created new file: ${filename}.md`);
+          // Note: File explorer will refresh when the file is saved
+        }
+      }
+    } catch (error) {
+      console.error('Error resolving wiki link:', error);
+      setStatus(`✗ Error resolving wiki link: ${error.message}`);
+    }
+  };
+  
+  // Resolve wiki link filename to full path
+  const resolveWikiLink = async (filename, folderPath) => {
+    try {
+      const result = await window.electronAPI.readDirectory(folderPath);
+      if (!result.success) return null;
+      
+      const files = result.items.filter(item => item.isFile);
+      
+      // Try exact match first
+      let match = files.find(file => file.name === filename);
+      if (match) return match.path;
+      
+      // Try with .md extension
+      match = files.find(file => file.name === `${filename}.md`);
+      if (match) return match.path;
+      
+      // Try with .markdown extension
+      match = files.find(file => file.name === `${filename}.markdown`);
+      if (match) return match.path;
+      
+      // Try case insensitive match
+      const lowerFilename = filename.toLowerCase();
+      match = files.find(file => 
+        file.name.toLowerCase() === lowerFilename ||
+        file.name.toLowerCase() === `${lowerFilename}.md` ||
+        file.name.toLowerCase() === `${lowerFilename}.markdown`
+      );
+      if (match) return match.path;
+      
+      return null; // No match found
+    } catch (error) {
+      console.error('Error reading directory for wiki link:', error);
+      return null;
+    }
+  };
+
   // Handle file click from explorer
   const handleExplorerFileClick = (filePath) => {
     console.log('Explorer: File clicked:', filePath);
@@ -2132,6 +2370,71 @@ function App() {
       });
   };
   
+  // Toolbar wrapper functions for file operations
+  const handleToolbarCreateFile = async () => {
+    if (currentFolder) {
+      const fileName = prompt('Enter file name:');
+      if (fileName) {
+        const filePath = `${currentFolder}/${fileName}${fileName.endsWith('.md') ? '' : '.md'}`;
+        const content = `# ${fileName.replace(/\.md$/, '')}\n\n`;
+        
+        try {
+          // Actually create the file on disk
+          const result = await window.electronAPI.writeFile(filePath, content);
+          if (result.success) {
+            
+            const newTab = {
+              id: Date.now(),
+              name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
+              content: content,
+              path: filePath,
+              isDirty: false
+            };
+            setTabs(prev => [...prev, newTab]);
+            setActiveTabId(newTab.id);
+            setStatus(`✓ New file created: ${newTab.name}`);
+            
+            // Refresh file explorer
+            if (fileExplorerRef.current) {
+              fileExplorerRef.current.refresh();
+            }
+          } else {
+            console.error('Toolbar: Failed to create file:', result.error);
+            setStatus(`✗ Failed to create file: ${result.error}`);
+          }
+        } catch (error) {
+          console.error('Toolbar: Error creating file:', error);
+          setStatus(`✗ Error creating file: ${error.message}`);
+        }
+      }
+    }
+  };
+  
+  const handleToolbarCreateFolder = async () => {
+    if (currentFolder) {
+      const folderName = prompt('Enter folder name:');
+      if (folderName) {
+        const newFolderPath = `${currentFolder}/${folderName}`;
+        try {
+          const result = await window.electronAPI.createFolder(newFolderPath);
+          if (result.success) {
+                setStatus(`✓ Folder created: ${folderName}`);
+            // Refresh file explorer to show new folder
+            if (fileExplorerRef.current) {
+              fileExplorerRef.current.refresh();
+            }
+          } else {
+            console.error('Failed to create folder:', result.error);
+            setStatus(`✗ Failed to create folder: ${result.error}`);
+          }
+        } catch (error) {
+          console.error('Error creating folder:', error);
+          setStatus(`✗ Error creating folder: ${error.message}`);
+        }
+      }
+    }
+  };
+  
   // Panel toggle functions
   const toggleExplorer = () => {
     setIsExplorerVisible(prev => !prev);
@@ -2143,16 +2446,6 @@ function App() {
     setStatus(isPreviewVisible ? 'Preview hidden' : 'Preview shown');
   };
   
-  // Handle toolbar formatting
-  const handleToolbarFormat = (action) => {
-    console.log('Toolbar format action:', action);
-    if (editorFormatHandlerRef.current) {
-      console.log('Calling editor format handler');
-      editorFormatHandlerRef.current(action);
-    } else {
-      console.log('No editor format handler available');
-    }
-  };
   
   // Resize handlers
   const handleResizeStart = (e, type) => {
@@ -2206,6 +2499,8 @@ function App() {
       };
     }
   }, [isResizing, resizeStartX, resizeStartWidth]);
+
+  // No need for content loading effect - editor recreates on tab change via key prop
 
   return React.createElement('div', {
     className: 'app-container',
@@ -2266,10 +2561,6 @@ function App() {
       )
     )),
     
-    // Toolbar
-    React.createElement(Toolbar, {
-      onFormat: handleToolbarFormat
-    }),
     
     // Main content area with file explorer
     React.createElement('div', {
@@ -2280,7 +2571,7 @@ function App() {
       }
     },
       // File Explorer (left sidebar)
-      currentFolder && isExplorerVisible && React.createElement('div', {
+      isExplorerVisible && React.createElement('div', {
         className: 'sidebar',
         style: {
           width: `${explorerWidth}px`,
@@ -2294,33 +2585,109 @@ function App() {
             padding: '5px 10px',
             fontSize: '12px',
             fontWeight: 'bold',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            borderBottom: '1px solid var(--border-light)'
           }
         }, 
-          React.createElement('span', null, 'Explorer'),
-          React.createElement('button', {
+          React.createElement('div', {
             style: {
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              fontSize: '12px',
-              color: '#666',
-              padding: '2px 4px'
-            },
-            onClick: toggleExplorer,
-            title: 'Hide Explorer'
-          }, '✕')
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '5px'
+            }
+          },
+            React.createElement('span', null, 'Explorer'),
+            React.createElement('button', {
+              style: {
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                fontSize: '12px',
+                color: '#666',
+                padding: '2px 4px'
+              },
+              onClick: toggleExplorer,
+              title: 'Hide Explorer'
+            }, '✕')
+          ),
+          // Explorer toolbar
+          currentFolder && React.createElement('div', {
+            style: {
+              display: 'flex',
+              gap: '4px',
+              padding: '4px 0'
+            }
+          },
+            React.createElement('button', {
+              style: {
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '3px',
+                fontSize: '14px',
+                color: 'var(--text-secondary)'
+              },
+              onClick: () => {
+                handleToolbarCreateFile();
+              },
+              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
+              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
+              title: 'New File'
+            }, '📄'),
+            React.createElement('button', {
+              style: {
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '3px',
+                fontSize: '14px',
+                color: 'var(--text-secondary)'
+              },
+              onClick: () => {
+                handleToolbarCreateFolder();
+              },
+              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
+              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
+              title: 'New Folder'
+            }, '📁'),
+            React.createElement('button', {
+              style: {
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '3px',
+                fontSize: '14px',
+                color: 'var(--text-secondary)'
+              },
+              onClick: () => {
+                if (fileExplorerRef.current) {
+                  fileExplorerRef.current.refresh();
+                }
+              },
+              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
+              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
+              title: 'Refresh Explorer'
+            }, '🔄')
+          )
         ),
         React.createElement(FileExplorer, {
+          ref: fileExplorerRef,
           currentFolder: currentFolder,
-          onFileClick: handleExplorerFileClick
+          onFileClick: handleExplorerFileClick,
+          onFolderChange: (action, data) => {
+            if (action === 'new-file') {
+              setTabs(prev => [...prev, data]);
+              setActiveTabId(data.id);
+            }
+          }
         })
       ),
       
       // Splitter between explorer and editor
-      currentFolder && isExplorerVisible && React.createElement(Splitter, {
+      isExplorerVisible && React.createElement(Splitter, {
         onMouseDown: (e) => handleResizeStart(e, 'explorer'),
         direction: 'vertical'
       }),
@@ -2360,18 +2727,18 @@ function App() {
             React.createElement('div', {
               style: { display: 'flex', gap: '8px' }
             },
-              // Explorer toggle (only show if there's a folder and explorer is hidden)
-              currentFolder && !isExplorerVisible && React.createElement('button', {
+              // Explorer toggle (always visible)
+              React.createElement('button', {
                 style: {
                   border: 'none',
                   background: 'none',
                   cursor: 'pointer',
                   fontSize: '11px',
-                  color: '#666',
+                  color: isExplorerVisible ? '#007acc' : '#666',
                   padding: '2px 4px'
                 },
                 onClick: toggleExplorer,
-                title: 'Show Explorer'
+                title: isExplorerVisible ? 'Hide Explorer' : 'Show Explorer'
               }, '📁'),
               // Preview toggle
               React.createElement('button', {
@@ -2380,7 +2747,7 @@ function App() {
                   background: 'none',
                   cursor: 'pointer',
                   fontSize: '11px',
-                  color: '#666',
+                  color: isPreviewVisible ? '#007acc' : '#666',
                   padding: '2px 4px'
                 },
                 onClick: togglePreview,
@@ -2388,6 +2755,10 @@ function App() {
               }, isPreviewVisible ? '👁️‍🗨️' : '👁️')
             )
           ),
+          // Toolbar
+          React.createElement(Toolbar, {
+            onFormat: handleFormat
+          }),
           React.createElement('div', {
             style: { 
               position: 'relative', 
@@ -2396,32 +2767,14 @@ function App() {
               flex: 1
             }
           },
-            preferences.useCodeMirror ? 
-              React.createElement(CodeMirrorEditor, {
-                content: currentTab.content,
-                onChange: handleContentChange,
-                theme: preferences.theme || 'light',
-                onScroll: handleScroll,
-                scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null
-              }) :
-              React.createElement(Editor, {
-                content: currentTab.content,
-                onChange: handleContentChange,
-                onScroll: handleScroll,
-                scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
-                onFormat: (handler) => {
-                  console.log('Setting editor format handler');
-                  editorFormatHandlerRef.current = handler;
-                },
-                onShowFindReplace: handleShowFindReplace,
-                editorRef: editorTextareaRef,
-                isFindReplaceOpen: showFindReplace
-              }),
-            React.createElement(FindReplace, {
-              isOpen: showFindReplace,
-              onClose: () => setShowFindReplace(false),
-              textareaRef: editorTextareaRef,
-              onContentChange: handleContentChange
+            React.createElement(CodeMirrorEditor, {
+              ref: editorRef,
+              key: activeTabId, // Force new instance when tab changes
+              initialContent: currentTab.content,
+              onChange: handleContentChange,
+              theme: preferences.theme || 'light',
+              onScroll: handleScroll,
+              scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null
             })
           )
         ),
@@ -2471,7 +2824,9 @@ function App() {
           React.createElement(Preview, {
             content: currentTab.content,
             onScroll: handleScroll,
-            scrollToPercentage: lastScrollSource === 'editor' ? previewScrollPercentage : null
+            scrollToPercentage: lastScrollSource === 'editor' ? previewScrollPercentage : null,
+            currentFileDir: currentTab.path ? currentTab.path.substring(0, currentTab.path.lastIndexOf('/')) : null,
+            onWikiLinkClick: handleWikiLinkClick
           })
         )
       )
