@@ -127,12 +127,9 @@ npm run build:electron # Package Electron app
 ## 🔮 Roadmap
 
 ### Upcoming Features
-- **Plugin system** for extensibility
 - **Advanced markdown support**: Tables, task lists, footnotes, LaTeX math
 - **Mermaid diagrams** integration
 - **Multi-window support**
-- **Vim/Emacs keybindings**
-- **Live collaboration**
 - **Cloud synchronization**
 
 ## 🤝 Contributing
@@ -141,10 +138,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ### Ways to Contribute
 - 🐛 **Bug reports** and feature requests
-- 💻 **Code contributions** and improvements
 - 📝 **Documentation** updates
 - 🎨 **Theme** contributions
-- 🌍 **Translations** and localization
 
 ## 📄 License
 
