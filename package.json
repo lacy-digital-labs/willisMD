@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
@@ -93,6 +93,10 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "public/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [
         {
           "target": "dmg",

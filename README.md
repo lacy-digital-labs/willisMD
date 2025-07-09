@@ -54,9 +54,11 @@ willisMD is a powerful yet intuitive markdown editor designed for writers, devel
 ### Download & Install
 1. Visit the [Releases page](https://github.com/lacy-digital-labs/willisMD/releases)
 2. Download the version for your platform:
-   - **macOS**: `.dmg` file
+   - **macOS**: `.dmg` file (arm64 for Apple Silicon, x64 for Intel)
    - **Windows**: `.exe` installer  
    - **Linux**: `.AppImage` or `.deb` package
+
+> **macOS Users**: If you see "willisMD is damaged and can't be opened", this is because the app isn't code-signed yet. See [this guide](docs/MACOS_UNSIGNED_APP.md) for solutions.
 
 ### First Use
 1. **Open willisMD**

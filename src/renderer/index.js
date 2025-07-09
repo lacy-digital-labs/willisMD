@@ -86,6 +86,43 @@ function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWiki
     };
   }, [onWikiLinkClick]);
   
+  // Handle all link clicks in the preview
+  useEffect(() => {
+    const handleLinkClick = (e) => {
+      const link = e.target.closest('a');
+      if (link && link.href) {
+        console.log('Link clicked:', link.href);
+        // Skip wiki links - they have their own handler
+        if (!link.classList.contains('wiki-link')) {
+          e.preventDefault();
+          console.log('Preventing default navigation for:', link.href);
+          
+          // Check if it's an external link
+          const url = link.href;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            console.log('Opening external link:', url);
+            // Open in external browser
+            window.electronAPI.openExternal(url).then(result => {
+              console.log('Open external result:', result);
+            }).catch(error => {
+              console.error('Error opening external link:', error);
+            });
+          }
+        }
+      }
+    };
+    
+    const previewElement = previewRef.current;
+    if (previewElement) {
+      previewElement.addEventListener('click', handleLinkClick);
+      console.log('Link click handler attached to preview');
+      
+      return () => {
+        previewElement.removeEventListener('click', handleLinkClick);
+      };
+    }
+  }, []);
+  
   // Handle external scroll requests (from editor)
   useEffect(() => {
     if (scrollToPercentage !== null && previewRef.current) {

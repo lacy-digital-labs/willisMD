@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 const { exportToPDF, exportToHTML, exportToEPUB, exportToDOCX } = require('./exportUtils');
@@ -891,6 +891,17 @@ ipcMain.handle('add-recent-folder', async (event, folderPath) => {
     return { success: true };
   } catch (error) {
     console.error('Failed to add recent folder:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Open external link handler
+ipcMain.handle('open-external', async (event, url) => {
+  try {
+    await shell.openExternal(url);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to open external link:', error);
     return { success: false, error: error.message };
   }
 });

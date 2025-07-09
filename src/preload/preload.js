@@ -90,6 +90,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   sendUnsavedChangesResponse: (data) => ipcRenderer.send('unsaved-changes-response', data),
   sendSaveAllComplete: () => ipcRenderer.send('save-all-complete'),
   
+  // External links
+  openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  
   // Remove listeners
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
 });
