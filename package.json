@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
@@ -53,6 +53,7 @@
     "html-pdf-node": "^1.0.8",
     "html-to-docx": "^1.8.0",
     "marked": "^15.0.12",
+    "mermaid": "^11.9.0",
     "officegen": "^0.6.5",
     "puppeteer": "^24.10.1",
     "react": "^19.1.0",

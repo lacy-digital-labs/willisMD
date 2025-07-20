@@ -502,6 +502,7 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
       crosshairCursor(),
       highlightActiveLine(),
       searchHighlight(),
+      EditorView.lineWrapping,
       keymap.of([
         ...closeBracketsKeymap,
         ...defaultKeymap,

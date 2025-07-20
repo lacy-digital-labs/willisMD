@@ -49,6 +49,7 @@ The project is actively developed with a fully functional Electron + React appli
 19. ✅ Code folding and bracket matching
 20. ✅ Multiple cursor support
 21. ✅ Support for Wiki style links
+22. ✅ Word wrap in editor for easier editing of long lines
 
 ## Features to Implement
 
@@ -59,13 +60,11 @@ The project is actively developed with a fully functional Electron + React appli
    - Footnotes
    - Math equations (LaTeX)
    - Mermaid diagrams
-3. Plugin system for extensibility
-4. Keyboard shortcuts for all menu actions
-5. Live markdown preview in editor (inline)
-6. Auto-completion for markdown syntax
-7. Vim/Emacs keybindings option
-8. Markdown linting
-9. Custom themes matching app themes
+3. Keyboard shortcuts for all menu actions
+4. Live markdown preview in editor (inline)
+5. Auto-completion for markdown syntax
+6. Markdown linting
+7. Custom themes matching app themes
 
 ## Development Commands
 
@@ -161,7 +160,17 @@ The CodeMirror editor is enabled by default for all users, providing a consisten
 4. No plugin system for extensibility
 5. Some CodeMirror features could be expanded (vim bindings, more extensions)
 
-## Recent Updates (v0.8.0)
+## Recent Updates (v0.8.3)
+
+- **Enhanced editor experience with word wrap** - Added word wrap functionality to CodeMirror editor for easier editing of long lines
+- **Improved editing usability** - Long paragraphs and sentences now wrap naturally in the editor without horizontal scrolling
+- **Maintained all existing functionality** - Word wrap addition preserves all existing features and performance
+
+## Previous Updates (v0.8.2)
+
+- **Fixed External Link Navigation Issue** - Resolved issue with external links not opening properly in default browser
+
+## Earlier Updates (v0.8.0)
 
 - **Fixed file explorer auto-refresh** - All file operations (create, delete, duplicate, save) now automatically refresh the explorer
 - **Enhanced context menu functionality** - Right-click operations in file explorer now work properly with custom input dialogs
