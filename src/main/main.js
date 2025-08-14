@@ -5,6 +5,7 @@ const { exportToPDF, exportToHTML, exportToEPUB, exportToDOCX } = require('./exp
 const preferencesManager = require('./preferences');
 
 let mainWindow;
+let fileToOpen = null; // Store file to open if app isn't ready yet
 
 function createWindow() {
   console.log('Creating Electron window...');
@@ -21,6 +22,21 @@ function createWindow() {
   });
 
   console.log('Window created, loading URL...');
+  
+  // Store window reference
+  mainWindow = win;
+  
+  // Handle file opening after window loads
+  win.webContents.once('did-finish-load', () => {
+    // Small delay to ensure renderer is fully ready
+    setTimeout(() => {
+      if (fileToOpen) {
+        console.log('Opening file after window load:', fileToOpen);
+        win.webContents.send('menu-open-file', fileToOpen);
+        fileToOpen = null; // Clear the file path
+      }
+    }, 500);
+  });
   
   // Load from dist folder instead of dev server for now
   if (process.env.NODE_ENV === 'development') {
@@ -1006,5 +1022,56 @@ app.on('activate', () => {
     mainWindow = createWindow();
   }
 });
+
+// Handle file opening on macOS (when file is double-clicked)
+app.on('open-file', async (event, filePath) => {
+  event.preventDefault();
+  console.log('App open-file event:', filePath);
+  
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    // Window exists, send file path to renderer
+    mainWindow.webContents.send('menu-open-file', filePath);
+    // Add to recent files
+    await preferencesManager.addRecentFile(filePath);
+    await createMenu(); // Rebuild menu to show updated recent files
+  } else {
+    // Store file path to open when window is ready
+    fileToOpen = filePath;
+    
+    // Create window if app is already ready
+    if (app.isReady()) {
+      mainWindow = createWindow();
+    }
+  }
+});
+
+// Handle file opening from command line arguments (Windows/Linux)
+// Check if a file was passed as argument when starting the app
+if (process.platform !== 'darwin') { // macOS uses open-file event instead
+  // In development, electron path is argv[0], app is argv[1], and file might be argv[2]
+  // In production, app is argv[0] and file might be argv[1]
+  let possibleFilePaths = [];
+  
+  if (app.isPackaged) {
+    // In packaged app, file path is likely argv[1]
+    if (process.argv.length >= 2) {
+      possibleFilePaths.push(process.argv[1]);
+    }
+  } else {
+    // In development, file path is likely argv[2] or later
+    if (process.argv.length >= 3) {
+      possibleFilePaths = process.argv.slice(2);
+    }
+  }
+  
+  // Check each argument to see if it's a markdown file
+  for (const arg of possibleFilePaths) {
+    if (arg && (arg.endsWith('.md') || arg.endsWith('.markdown')) && require('fs').existsSync(arg)) {
+      console.log('File argument detected:', arg);
+      fileToOpen = arg;
+      break;
+    }
+  }
+}
 
 console.log('Electron main process started');

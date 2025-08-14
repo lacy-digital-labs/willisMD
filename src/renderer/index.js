@@ -1587,6 +1587,24 @@ function App() {
   // Get current tab
   const currentTab = tabs.find(tab => tab.id === activeTabId) || tabs[0];
   
+  // Helper function to get a more informative tab title
+  const getTabDisplayName = (tab) => {
+    if (!tab.path) return tab.name;
+    
+    // Check if there are other tabs with the same filename
+    const sameName = tabs.filter(t => t.name === tab.name && t.path);
+    if (sameName.length <= 1) return tab.name;
+    
+    // If multiple files have the same name, show parent directory
+    const pathParts = tab.path.split('/');
+    if (pathParts.length >= 2) {
+      const parentDir = pathParts[pathParts.length - 2];
+      return `${parentDir}/${tab.name}`;
+    }
+    
+    return tab.name;
+  };
+  
   // Debug effect for showAboutDialog
   useEffect(() => {
     console.log('App: showAboutDialog state changed to:', showAboutDialog);
@@ -2238,7 +2256,21 @@ function App() {
     
     // Close the tab
     console.log('Closing tab:', tabToClose.name);
-    if (tabs.length > 1) {
+    
+    if (tabs.length === 1) {
+      // If closing the last tab, create a new empty tab
+      const newTab = {
+        id: Date.now(),
+        name: 'Untitled.md',
+        content: '# New Document\n\n',
+        path: null,
+        isDirty: false
+      };
+      setTabs([newTab]);
+      setActiveTabId(newTab.id);
+      setStatus(`Closed: ${tabToClose.name}`);
+    } else {
+      // Normal close behavior for multiple tabs
       const newTabs = tabs.filter(tab => tab.id !== tabId);
       setTabs(newTabs);
       
@@ -2578,9 +2610,10 @@ function App() {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
-          }
-        }, `${tab.name}${tab.isDirty ? ' •' : ''}`),
-        tabs.length > 1 && React.createElement('button', {
+          },
+          title: tab.path || tab.name // Show full path as tooltip
+        }, `${getTabDisplayName(tab)}${tab.isDirty ? ' •' : ''}`),
+        React.createElement('button', {
           style: {
             marginLeft: '8px',
             padding: '2px 6px',
