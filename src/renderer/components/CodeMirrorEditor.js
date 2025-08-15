@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLine, highlightSelectionMatches } from '@codemirror/view';
 import { EditorState, Annotation } from '@codemirror/state';
 import { defaultHighlightStyle, syntaxHighlighting, indentOnInput, bracketMatching, foldGutter, foldKeymap } from '@codemirror/language';
-import { history, defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands';
+import { history, defaultKeymap, historyKeymap, indentWithTab, undo, redo } from '@codemirror/commands';
 import { searchKeymap, highlightSelectionMatches as searchHighlight } from '@codemirror/search';
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { markdown } from '@codemirror/lang-markdown';
@@ -18,6 +18,7 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
   const viewRef = useRef(null);
   const isScrollingRef = useRef(false);
   const editorStateRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null);
 
   // Table modification helper function
   const handleTableModification = (view, action, from, to) => {
@@ -196,6 +197,101 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
       selection: { anchor: newCursorPos, head: newCursorPos },
       annotations: formattingAnnotation.of(true)
     });
+  };
+
+  // Handle right-click context menu
+  const handleContextMenu = (event, view) => {
+    event.preventDefault();
+    
+    const { state } = view;
+    const { selection } = state;
+    const selectedText = state.doc.sliceString(selection.main.from, selection.main.to);
+    const isTextSelected = selection.main.from !== selection.main.to;
+    
+    // Get cursor position in the editor
+    const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+    
+    // If right-clicking outside of selection, move cursor to click position
+    if (pos && !isTextSelected) {
+      view.dispatch({
+        selection: { anchor: pos, head: pos }
+      });
+    }
+    
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      selectedText,
+      isTextSelected,
+      cursorPos: pos || selection.main.from
+    });
+  };
+
+  // Close context menu when clicking elsewhere
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    if (contextMenu) {
+      document.addEventListener('click', handleClick);
+      return () => document.removeEventListener('click', handleClick);
+    }
+  }, [contextMenu]);
+
+  // Execute context menu actions
+  const executeContextAction = (action) => {
+    if (!viewRef.current) return;
+    
+    const view = viewRef.current;
+    const { state } = view;
+    const { selection } = state;
+    
+    switch (action) {
+      case 'cut':
+        const cutText = state.doc.sliceString(selection.main.from, selection.main.to);
+        navigator.clipboard.writeText(cutText);
+        view.dispatch({
+          changes: { from: selection.main.from, to: selection.main.to, insert: '' }
+        });
+        break;
+        
+      case 'copy':
+        const copyText = state.doc.sliceString(selection.main.from, selection.main.to);
+        navigator.clipboard.writeText(copyText);
+        break;
+        
+      case 'paste':
+        navigator.clipboard.readText().then(text => {
+          view.dispatch({
+            changes: { from: selection.main.from, to: selection.main.to, insert: text }
+          });
+        });
+        break;
+        
+      case 'select-all':
+        view.dispatch({
+          selection: { anchor: 0, head: state.doc.length }
+        });
+        break;
+        
+      case 'find':
+        // Trigger find dialog through parent component
+        window.electronAPI.menuAction('find');
+        break;
+        
+      case 'replace':
+        // Trigger replace dialog through parent component
+        window.electronAPI.menuAction('replace');
+        break;
+        
+      case 'undo':
+        undo(view);
+        break;
+        
+      case 'redo':
+        redo(view);
+        break;
+    }
+    
+    setContextMenu(null);
   };
 
   // Expose formatting methods to parent component
@@ -546,7 +642,7 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
             onChange && onChange(newContent);
           }
         }),
-        // Add scroll listener
+        // Add scroll and context menu listeners
         EditorView.domEventHandlers({
           scroll: (_, view) => {
             if (!isScrollingRef.current && onScroll) {
@@ -555,6 +651,10 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
               onScroll(scrollPercentage, 'editor');
             }
             return false;
+          },
+          contextmenu: (event, view) => {
+            handleContextMenu(event, view);
+            return true; // Prevent default context menu
           }
         })
       ]
@@ -599,6 +699,202 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
   return (
     <div className="codemirror-editor">
       <div ref={editorRef} className="editor-container" />
+      {contextMenu && (
+        <div
+          style={{
+            position: 'fixed',
+            left: contextMenu.x,
+            top: contextMenu.y,
+            backgroundColor: theme === 'dark' ? '#2d2d2d' : '#fff',
+            border: `1px solid ${theme === 'dark' ? '#444' : '#ddd'}`,
+            borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            minWidth: '160px',
+            fontSize: '13px',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.isTextSelected && (
+            <>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => executeContextAction('cut')}
+              >
+                ✂️ Cut
+              </div>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => executeContextAction('copy')}
+              >
+                📋 Copy
+              </div>
+              <div style={{ height: '1px', backgroundColor: theme === 'dark' ? '#444' : '#e0e0e0', margin: '4px 0' }} />
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => ref.current?.formatText('bold')}
+              >
+                <strong>B</strong> Bold
+              </div>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => ref.current?.formatText('italic')}
+              >
+                <em>I</em> Italic
+              </div>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => ref.current?.formatText('code')}
+              >
+                <code>`</code> Code
+              </div>
+              <div
+                style={{
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  color: theme === 'dark' ? '#e0e0e0' : '#333',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={() => ref.current?.formatText('link')}
+              >
+                🔗 Link
+              </div>
+              <div style={{ height: '1px', backgroundColor: theme === 'dark' ? '#444' : '#e0e0e0', margin: '4px 0' }} />
+            </>
+          )}
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('paste')}
+          >
+            📄 Paste
+          </div>
+          <div style={{ height: '1px', backgroundColor: theme === 'dark' ? '#444' : '#e0e0e0', margin: '4px 0' }} />
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('select-all')}
+          >
+            ⬚ Select All
+          </div>
+          <div style={{ height: '1px', backgroundColor: theme === 'dark' ? '#444' : '#e0e0e0', margin: '4px 0' }} />
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('find')}
+          >
+            🔍 Find
+          </div>
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('replace')}
+          >
+            🔄 Replace
+          </div>
+          <div style={{ height: '1px', backgroundColor: theme === 'dark' ? '#444' : '#e0e0e0', margin: '4px 0' }} />
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('undo')}
+          >
+            ↶ Undo
+          </div>
+          <div
+            style={{
+              padding: '8px 16px',
+              cursor: 'pointer',
+              color: theme === 'dark' ? '#e0e0e0' : '#333',
+              backgroundColor: 'transparent',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = theme === 'dark' ? '#3a3a3a' : '#f0f0f0'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            onClick={() => executeContextAction('redo')}
+          >
+            ↷ Redo
+          </div>
+        </div>
+      )}
     </div>
   );
 });

@@ -564,7 +564,54 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📁 New Folder'),
         React.createElement('div', {
-          key: 'separator',
+          key: 'separator1',
+          style: {
+            height: '1px',
+            backgroundColor: '#eee',
+            margin: '4px 0'
+          }
+        }),
+        React.createElement('div', {
+          key: 'rename',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            showInputDialog('Rename Folder', 'Enter new name:', contextMenu.item.name, (newName) => {
+              if (newName && newName !== contextMenu.item.name) {
+                const oldPath = contextMenu.item.path;
+                const parentDir = oldPath.substring(0, oldPath.lastIndexOf('/'));
+                const newPath = parentDir + '/' + newName;
+                window.electronAPI.renameItem(oldPath, newPath).then(() => {
+                  refreshExplorer();
+                  showStatusMessage(`Renamed folder to ${newName}`);
+                }).catch(err => {
+                  showStatusMessage(`Error renaming folder: ${err.message}`, 'error');
+                });
+              }
+            });
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '✏️ Rename'),
+        React.createElement('div', {
+          key: 'copy-path',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            navigator.clipboard.writeText(contextMenu.item.path);
+            showStatusMessage('Path copied to clipboard');
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📋 Copy Path'),
+        React.createElement('div', {
+          key: 'separator2',
           style: {
             height: '1px',
             backgroundColor: '#eee',
@@ -594,6 +641,64 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📋 Duplicate'),
+        React.createElement('div', {
+          key: 'rename',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            const fileExtension = contextMenu.item.name.includes('.') ? contextMenu.item.name.substring(contextMenu.item.name.lastIndexOf('.')) : '';
+            const baseName = contextMenu.item.name.includes('.') ? contextMenu.item.name.substring(0, contextMenu.item.name.lastIndexOf('.')) : contextMenu.item.name;
+            showInputDialog('Rename File', 'Enter new name:', baseName, (newName) => {
+              if (newName) {
+                const fullName = newName + fileExtension;
+                if (fullName !== contextMenu.item.name) {
+                  const oldPath = contextMenu.item.path;
+                  const parentDir = oldPath.substring(0, oldPath.lastIndexOf('/'));
+                  const newPath = parentDir + '/' + fullName;
+                  window.electronAPI.renameItem(oldPath, newPath).then(() => {
+                    refreshExplorer();
+                    showStatusMessage(`Renamed file to ${fullName}`);
+                  }).catch(err => {
+                    showStatusMessage(`Error renaming file: ${err.message}`, 'error');
+                  });
+                }
+              }
+            });
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '✏️ Rename'),
+        React.createElement('div', {
+          key: 'copy-path',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            navigator.clipboard.writeText(contextMenu.item.path);
+            showStatusMessage('Path copied to clipboard');
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📋 Copy Path'),
+        React.createElement('div', {
+          key: 'copy-name',
+          style: {
+            padding: '8px 16px',
+            cursor: 'pointer',
+            color: '#333'
+          },
+          onClick: () => {
+            navigator.clipboard.writeText(contextMenu.item.name);
+            showStatusMessage('Filename copied to clipboard');
+          },
+          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
+        }, '📋 Copy Name'),
         React.createElement('div', {
           key: 'separator',
           style: {
