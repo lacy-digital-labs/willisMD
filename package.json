@@ -91,6 +91,9 @@
       "templates/**/*",
       "!node_modules/puppeteer/.local-chromium/**/*"
     ],
+    "asarUnpack": [
+      "templates/**/*"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "public/icon.icns",

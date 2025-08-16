@@ -4,6 +4,7 @@ import { marked } from 'marked';
 import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
 import AboutDialog from './components/AboutDialog';
+import HelpDialog from './components/HelpDialog';
 import CodeMirrorEditor from './components/CodeMirrorEditor';
 import { previewStyles, getStyleCSS, getStyleNames } from '../shared/previewStyles';
 import './styles.css';
@@ -415,20 +416,20 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
             padding: `4px 8px 4px ${paddingLeft}px`,
             cursor: 'pointer',
             fontSize: '13px',
-            color: '#333',
+            color: 'var(--text-primary)',
             borderRadius: '3px',
             marginBottom: '2px'
           },
           onClick: () => toggleFolder(item.path),
           onContextMenu: (e) => handleContextMenu(e, item),
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         },
           React.createElement('span', {
             style: { 
               marginRight: '6px',
               fontSize: '10px',
-              color: '#666'
+              color: 'var(--text-secondary)'
             }
           }, isExpanded ? '▼' : '▶'),
           React.createElement('span', {
@@ -449,13 +450,13 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           padding: `4px 8px 4px ${paddingLeft + 16}px`,
           cursor: 'pointer',
           fontSize: '13px',
-          color: '#333',
+          color: 'var(--text-primary)',
           borderRadius: '3px',
           marginBottom: '2px'
         },
         onClick: () => onFileClick(item.path),
         onContextMenu: (e) => handleContextMenu(e, item),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       },
         React.createElement('span', {
@@ -472,7 +473,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
       style: {
         padding: '15px',
         textAlign: 'center',
-        color: '#666',
+        color: 'var(--text-secondary)',
         fontSize: '13px',
         height: '100%',
         display: 'flex',
@@ -507,8 +508,8 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
         borderBottom: '1px solid #eee',
         fontSize: '12px',
         fontWeight: 'bold',
-        color: '#333',
-        backgroundColor: '#f8f8f8'
+        color: 'var(--text-primary)',
+        backgroundColor: 'var(--bg-tertiary)'
       }
     }, currentFolder.split('/').pop() || currentFolder),
     
@@ -520,7 +521,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
         React.createElement('div', {
           style: { 
             textAlign: 'center',
-            color: '#666',
+            color: 'var(--text-secondary)',
             padding: '20px'
           }
         }, 'Loading...') :
@@ -533,10 +534,10 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
         position: 'fixed',
         left: contextMenu.x,
         top: contextMenu.y,
-        backgroundColor: '#fff',
-        border: '1px solid #ddd',
+        backgroundColor: 'var(--bg-primary)',
+        border: '1px solid var(--border-medium)',
         borderRadius: '4px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        boxShadow: '0 2px 8px var(--shadow-medium)',
         zIndex: 1000,
         minWidth: '150px',
         padding: '4px 0',
@@ -550,12 +551,12 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             handleCreateNewFile(contextMenu.item.path);
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📄 New File'),
         React.createElement('div', {
@@ -563,19 +564,19 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             handleCreateFolder(contextMenu.item.path);
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📁 New Folder'),
         React.createElement('div', {
           key: 'separator1',
           style: {
             height: '1px',
-            backgroundColor: '#eee',
+            backgroundColor: 'var(--border-light)',
             margin: '4px 0'
           }
         }),
@@ -584,7 +585,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             showInputDialog('Rename Folder', 'Enter new name:', contextMenu.item.name, (newName) => {
@@ -601,7 +602,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
               }
             });
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '✏️ Rename'),
         React.createElement('div', {
@@ -609,20 +610,20 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             navigator.clipboard.writeText(contextMenu.item.path);
             showStatusMessage('Path copied to clipboard');
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📋 Copy Path'),
         React.createElement('div', {
           key: 'separator2',
           style: {
             height: '1px',
-            backgroundColor: '#eee',
+            backgroundColor: 'var(--border-light)',
             margin: '4px 0'
           }
         }),
@@ -631,10 +632,10 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#d32f2f'
+            color: 'var(--error)'
           },
           onClick: () => handleDeleteItem(contextMenu.item),
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#ffebee',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'rgba(220, 53, 69, 0.1)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '🗑️ Delete Folder')
       ] : [
@@ -643,10 +644,10 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => handleDuplicateFile(contextMenu.item.path),
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📋 Duplicate'),
         React.createElement('div', {
@@ -654,7 +655,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             const fileExtension = contextMenu.item.name.includes('.') ? contextMenu.item.name.substring(contextMenu.item.name.lastIndexOf('.')) : '';
@@ -676,7 +677,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
               }
             });
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '✏️ Rename'),
         React.createElement('div', {
@@ -684,13 +685,13 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             navigator.clipboard.writeText(contextMenu.item.path);
             showStatusMessage('Path copied to clipboard');
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📋 Copy Path'),
         React.createElement('div', {
@@ -698,20 +699,20 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#333'
+            color: 'var(--text-primary)'
           },
           onClick: () => {
             navigator.clipboard.writeText(contextMenu.item.name);
             showStatusMessage('Filename copied to clipboard');
           },
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '📋 Copy Name'),
         React.createElement('div', {
           key: 'separator',
           style: {
             height: '1px',
-            backgroundColor: '#eee',
+            backgroundColor: 'var(--border-light)',
             margin: '4px 0'
           }
         }),
@@ -720,10 +721,10 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             padding: '8px 16px',
             cursor: 'pointer',
-            color: '#d32f2f'
+            color: 'var(--error)'
           },
           onClick: () => handleDeleteItem(contextMenu.item),
-          onMouseEnter: (e) => e.target.style.backgroundColor = '#ffebee',
+          onMouseEnter: (e) => e.target.style.backgroundColor = 'rgba(220, 53, 69, 0.1)',
           onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
         }, '🗑️ Delete File')
       ]
@@ -751,7 +752,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
     },
       React.createElement('div', {
         style: {
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--bg-primary)',
           padding: '20px',
           borderRadius: '8px',
           minWidth: '300px',
@@ -759,7 +760,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
         }
       },
         React.createElement('h3', {
-          style: { margin: '0 0 15px 0', color: '#333' }
+          style: { margin: '0 0 15px 0', color: 'var(--text-primary)' }
         }, showInputDialog.title),
         React.createElement('input', {
           type: 'text',
@@ -840,17 +841,17 @@ function Splitter({ onMouseDown, direction = 'vertical' }) {
     style: {
       width: direction === 'vertical' ? '4px' : '100%',
       height: direction === 'horizontal' ? '4px' : '100%',
-      backgroundColor: '#ddd',
+      backgroundColor: 'var(--border-medium)',
       cursor: direction === 'vertical' ? 'col-resize' : 'row-resize',
       position: 'relative',
       zIndex: 10
     },
     onMouseDown: onMouseDown,
     onMouseEnter: (e) => {
-      e.target.style.backgroundColor = '#bbb';
+      e.target.style.backgroundColor = 'var(--border-dark)';
     },
     onMouseLeave: (e) => {
-      e.target.style.backgroundColor = '#ddd';
+      e.target.style.backgroundColor = 'var(--border-medium)';
     }
   });
 }
@@ -867,14 +868,14 @@ function TableSizeSelector({ onSelect, onClose }) {
     gridTemplateColumns: `repeat(${maxCols}, 16px)`,
     gap: '1px',
     padding: '8px',
-    backgroundColor: '#f8f8f8'
+    backgroundColor: 'var(--bg-tertiary)'
   };
   
   const cellStyle = (row, col) => ({
     width: '16px',
     height: '16px',
     border: '1px solid #ddd',
-    backgroundColor: (row <= hoveredCell.row && col <= hoveredCell.col) ? '#4CAF50' : '#fff',
+    backgroundColor: (row <= hoveredCell.row && col <= hoveredCell.col) ? 'var(--success)' : 'var(--bg-primary)',
     cursor: 'pointer'
   });
   
@@ -913,7 +914,7 @@ function TableSizeSelector({ onSelect, onClose }) {
       style: {
         textAlign: 'center',
         fontSize: '12px',
-        color: '#666',
+        color: 'var(--text-secondary)',
         marginBottom: '4px'
       }
     }, `${hoveredCell.row} × ${hoveredCell.col} Table`),
@@ -930,7 +931,7 @@ function TableDropdown({ onFormat }) {
   
   const buttonStyle = {
     border: '1px solid #ddd',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'var(--bg-tertiary)',
     color: '#333',
     padding: '6px 10px',
     margin: '0 2px',
@@ -1239,6 +1240,20 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
       console.error('Error selecting folder:', error);
     }
   };
+
+  const handleRefreshTemplates = async () => {
+    try {
+      const result = await window.electronAPI.refreshTemplates();
+      if (result.success) {
+        alert('Templates refreshed successfully! All default templates have been restored.');
+      } else {
+        alert(`Failed to refresh templates: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error refreshing templates:', error);
+      alert(`Error refreshing templates: ${error.message}`);
+    }
+  };
   
   return React.createElement('div', {
     className: 'modal-backdrop',
@@ -1286,9 +1301,9 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             fontWeight: 'bold',
             color: 'var(--text-primary)'
           }
-        }, 'Theme'),
+        }, 'Color Theme'),
         React.createElement('select', {
-          value: localPrefs.theme || 'light',
+          value: localPrefs.theme || 'standard',
           onChange: (e) => setLocalPrefs(prev => ({
             ...prev,
             theme: e.target.value
@@ -1299,11 +1314,11 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
             border: '1px solid var(--border-medium)',
             borderRadius: '4px',
             backgroundColor: 'var(--bg-primary)',
-            color: 'var(--text-primary)'
+            color: 'var(--text-primary)',
+            marginBottom: '10px'
           }
         },
-          React.createElement('option', { value: 'light' }, 'Light'),
-          React.createElement('option', { value: 'dark' }, 'Dark'),
+          React.createElement('option', { value: 'standard' }, 'Standard'),
           React.createElement('option', { value: 'forest-green' }, 'Forest Green'),
           React.createElement('option', { value: 'blue-moon' }, 'Blue Moon'),
           React.createElement('option', { value: 'monochrome' }, 'Monochrome'),
@@ -1312,6 +1327,33 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
           React.createElement('option', { value: 'polar' }, 'Polar'),
           React.createElement('option', { value: 'orange-blossom' }, 'Orange Blossom'),
           React.createElement('option', { value: 'christmas' }, 'Christmas')
+        ),
+        React.createElement('label', {
+          style: { 
+            display: 'block', 
+            marginBottom: '8px', 
+            fontWeight: 'bold',
+            color: 'var(--text-primary)',
+            marginTop: '10px'
+          }
+        }, 'Mode'),
+        React.createElement('select', {
+          value: localPrefs.mode || 'light',
+          onChange: (e) => setLocalPrefs(prev => ({
+            ...prev,
+            mode: e.target.value
+          })),
+          style: {
+            width: '100%',
+            padding: '8px',
+            border: '1px solid var(--border-medium)',
+            borderRadius: '4px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)'
+          }
+        },
+          React.createElement('option', { value: 'light' }, '☀️ Light Mode'),
+          React.createElement('option', { value: 'dark' }, '🌙 Dark Mode')
         )
       ),
       
@@ -1425,6 +1467,34 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
               cursor: 'pointer'
             }
           }, 'Clear')
+        ),
+        React.createElement('div', {
+          style: { 
+            marginTop: '8px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)'
+          }
+        },
+          React.createElement('button', {
+            onClick: handleRefreshTemplates,
+            style: {
+              padding: '6px 12px',
+              border: '1px solid var(--border-medium)',
+              borderRadius: '4px',
+              backgroundColor: 'var(--accent-primary)',
+              color: 'var(--text-inverse)',
+              cursor: 'pointer',
+              fontSize: '12px',
+              marginRight: '8px'
+            }
+          }, '🔄 Refresh Templates'),
+          React.createElement('span', {
+            style: { 
+              fontSize: '11px',
+              color: 'var(--text-muted)',
+              fontStyle: 'italic'
+            }
+          }, 'Restore all default templates (will overwrite existing ones)')
         )
       ),
       
@@ -1739,6 +1809,7 @@ function App() {
   const [templates, setTemplates] = useState([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
   
   
   // Get current tab
@@ -1785,21 +1856,49 @@ function App() {
   const autoSaveTimerRef = useRef(null);
   
   // Theme helper function
-  const applyTheme = (theme) => {
+  const applyTheme = (theme, mode) => {
+    console.log('Applying theme:', theme, 'mode:', mode);
     const root = document.documentElement;
+    
     const validThemes = [
-      'light', 'dark', 'forest-green', 'blue-moon', 'monochrome',
+      'standard', 'forest-green', 'blue-moon', 'monochrome',
       'valentine', 'desert', 'polar', 'orange-blossom', 'christmas'
     ];
     
-    if (validThemes.includes(theme) && theme !== 'light') {
-      root.setAttribute('data-theme', theme);
-    } else {
-      // Default to light theme (no data-theme attribute needed)
-      root.removeAttribute('data-theme');
+    const validModes = ['light', 'dark'];
+    
+    // Handle backwards compatibility - if theme is 'light' or 'dark', convert to new system
+    let finalTheme = theme;
+    let finalMode = mode;
+    
+    if (theme === 'light') {
+      finalTheme = 'standard';
+      finalMode = 'light';
+    } else if (theme === 'dark') {
+      finalTheme = 'standard';
+      finalMode = 'dark';
     }
     
-    console.log('Applied theme:', theme);
+    // Default values
+    finalTheme = validThemes.includes(finalTheme) ? finalTheme : 'standard';
+    finalMode = validModes.includes(finalMode) ? finalMode : 'light';
+    
+    // Apply theme and mode
+    if (finalTheme === 'standard' && finalMode === 'light') {
+      // Default case - no attributes needed
+      root.removeAttribute('data-theme');
+      root.removeAttribute('data-mode');
+    } else if (finalTheme === 'standard' && finalMode === 'dark') {
+      // Standard dark mode - use old 'dark' theme for backwards compatibility
+      root.setAttribute('data-theme', 'dark');
+      root.removeAttribute('data-mode');
+    } else {
+      // Custom theme with mode
+      root.setAttribute('data-theme', finalTheme);
+      root.setAttribute('data-mode', finalMode);
+    }
+    
+    console.log('Applied theme:', finalTheme, 'mode:', finalMode);
   };
   
   // Preferences handlers
@@ -1814,6 +1913,14 @@ function App() {
     console.log('App: Current showAboutDialog state:', showAboutDialog);
     setShowAboutDialog(true);
     console.log('App: Setting showAboutDialog to true');
+  };
+  
+  // Help dialog handler
+  const handleShowHelp = () => {
+    console.log('App: Show help requested - handleShowHelp called');
+    console.log('App: Current showHelpDialog state:', showHelpDialog);
+    setShowHelpDialog(true);
+    console.log('App: Setting showHelpDialog to true');
   };
   
   // Formatting handler for Toolbar
@@ -1838,7 +1945,7 @@ function App() {
       setPreferences(newPreferences);
       
       // Apply theme immediately
-      applyTheme(newPreferences.theme);
+      applyTheme(newPreferences.theme, newPreferences.mode);
       
       // Update auto save if changed
       if (newPreferences.autoSave !== autoSaveEnabled) {
@@ -2372,6 +2479,9 @@ function App() {
       console.log('App: Registering onShowAbout listener');
       window.electronAPI.onShowAbout(handleShowAbout);
       console.log('App: onShowAbout listener registered');
+      console.log('App: Registering onShowHelp listener');
+      window.electronAPI.onShowHelp(handleShowHelp);
+      console.log('App: onShowHelp listener registered');
       window.electronAPI.onCheckUnsavedChanges(handleCheckUnsavedChanges);
       window.electronAPI.onSaveAllBeforeQuit(handleSaveAllBeforeQuit);
       console.log('App: All listeners registered');
@@ -2445,7 +2555,7 @@ function App() {
         setPreferences(prefs);
         
         // Apply theme
-        applyTheme(prefs.theme);
+        applyTheme(prefs.theme, prefs.mode);
         
         // Set auto save
         setAutoSaveEnabled(prefs.autoSave || false);
@@ -2967,7 +3077,7 @@ function App() {
                 background: 'none',
                 cursor: 'pointer',
                 fontSize: '12px',
-                color: '#666',
+                color: 'var(--text-secondary)',
                 padding: '2px 4px'
               },
               onClick: toggleExplorer,
@@ -3078,10 +3188,10 @@ function App() {
           React.createElement('div', {
             style: {
               padding: '5px 10px',
-              backgroundColor: '#f8f8f8',
+              backgroundColor: 'var(--bg-tertiary)',
               borderBottom: '1px solid #eee',
               fontSize: '12px',
-              color: '#666',
+              color: 'var(--text-secondary)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
@@ -3136,7 +3246,7 @@ function App() {
               key: activeTabId, // Force new instance when tab changes
               initialContent: currentTab.content,
               onChange: handleContentChange,
-              theme: preferences.theme || 'light',
+              theme: preferences.mode || 'light',
               onScroll: handleScroll,
               scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null
             })
@@ -3162,10 +3272,10 @@ function App() {
           React.createElement('div', {
             style: {
               padding: '5px 10px',
-              backgroundColor: '#f8f8f8',
+              backgroundColor: 'var(--bg-tertiary)',
               borderBottom: '1px solid #eee',
               fontSize: '12px',
-              color: '#666',
+              color: 'var(--text-secondary)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
@@ -3197,9 +3307,10 @@ function App() {
                 style: {
                   fontSize: '11px',
                   padding: '2px 4px',
-                  border: '1px solid #ccc',
+                  border: '1px solid var(--border-medium)',
                   borderRadius: '3px',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
                   cursor: 'pointer'
                 },
                 title: 'Select preview style'
@@ -3217,7 +3328,7 @@ function App() {
                   background: 'none',
                   cursor: 'pointer',
                   fontSize: '12px',
-                  color: '#666',
+                  color: 'var(--text-secondary)',
                   padding: '2px 4px'
                 },
                 onClick: togglePreview,
@@ -3276,6 +3387,11 @@ function App() {
     React.createElement(AboutDialog, {
       isOpen: showAboutDialog,
       onClose: () => setShowAboutDialog(false)
+    }),
+    
+    React.createElement(HelpDialog, {
+      isOpen: showHelpDialog,
+      onClose: () => setShowHelpDialog(false)
     })
   );
 }

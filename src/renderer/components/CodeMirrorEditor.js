@@ -634,6 +634,17 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
           },
           '&.cm-focused': {
             outline: 'none'
+          },
+          '.cm-lineNumbers': {
+            backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
+            color: theme === 'dark' ? '#858585' : '#6e7681'
+          },
+          '.cm-lineNumbers .cm-gutterElement': {
+            color: theme === 'dark' ? '#858585' : '#6e7681'
+          },
+          '.cm-gutters': {
+            backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
+            borderRight: theme === 'dark' ? '1px solid #404040' : '1px solid #e0e0e0'
           }
         }),
         EditorView.updateListener.of((update) => {

@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   preferencesSave: (preferences) => ipcRenderer.invoke('preferences-save', preferences),
   preferencesGet: (key) => ipcRenderer.invoke('preferences-get', key),
   preferencesSet: (key, value) => ipcRenderer.invoke('preferences-set', key, value),
+  refreshTemplates: () => ipcRenderer.invoke('preferences-refresh-templates'),
   showFolderDialog: () => ipcRenderer.invoke('show-folder-dialog'),
   getTemplates: () => ipcRenderer.invoke('get-templates'),
   
@@ -79,6 +80,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       callback();
     });
   },
+  
+  onShowHelp: (callback) => {
+    console.log('Preload: Setting up onShowHelp listener');
+    ipcRenderer.on('menu-show-help', (event) => {
+      console.log('Preload: Received menu-show-help event');
+      callback();
+    });
+  },
+  
+  getHelpContent: () => ipcRenderer.invoke('get-help-content'),
   
   // Find and Replace
   onFind: (callback) => ipcRenderer.on('menu-find', callback),

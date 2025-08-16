@@ -1,0 +1,239 @@
+.help-dialog-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--shadow-heavy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.help-dialog {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px var(--shadow-medium);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.help-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.help-dialog-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.help-dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.help-dialog-close:hover {
+  background-color: var(--bg-accent);
+}
+
+.help-dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.help-dialog-loading {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+}
+
+.help-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.help-content h1 {
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-medium);
+  padding-bottom: 8px;
+}
+
+.help-content h2 {
+  font-size: 20px;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 4px;
+}
+
+.help-content h3 {
+  font-size: 16px;
+  margin-top: 24px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.help-content h4 {
+  font-size: 14px;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.help-content p {
+  margin: 12px 0;
+}
+
+.help-content ul, .help-content ol {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.help-content li {
+  margin: 6px 0;
+}
+
+.help-content code {
+  background-color: var(--bg-tertiary);
+  color: var(--syntax-keyword);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+}
+
+.help-content pre {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 16px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.help-content pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.help-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.help-content th,
+.help-content td {
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid var(--border-medium);
+}
+
+.help-content th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.help-content tr:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+.help-content a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.help-content a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.help-content hr {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 24px 0;
+}
+
+.help-content blockquote {
+  border-left: 4px solid var(--accent-primary);
+  margin: 16px 0;
+  padding: 8px 16px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.help-content strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.help-content em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.help-dialog-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.help-dialog-button {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--accent-primary);
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.help-dialog-button:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.help-dialog-button:active {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Theme variables handle all color variations automatically */

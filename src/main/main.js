@@ -1176,6 +1176,23 @@ async function createMenu() {
       label: 'Help',
       submenu: [
         {
+          label: 'Help Guide',
+          click: () => {
+            console.log('Help Guide menu clicked');
+            const focusedWindow = BrowserWindow.getFocusedWindow();
+            if (focusedWindow) {
+              console.log('Sending menu-show-help to focused window');
+              focusedWindow.webContents.send('menu-show-help');
+            } else if (mainWindow && !mainWindow.isDestroyed()) {
+              console.log('Sending menu-show-help to main window');
+              mainWindow.webContents.send('menu-show-help');
+            } else {
+              console.log('No window available to show help dialog');
+            }
+          }
+        },
+        { type: 'separator' },
+        {
           label: 'About willisMD',
           click: () => {
             console.log('About menu clicked');
@@ -1681,6 +1698,16 @@ ipcMain.handle('preferences-set', async (event, key, value) => {
   }
 });
 
+// Refresh templates handler
+ipcMain.handle('preferences-refresh-templates', async () => {
+  try {
+    return await preferencesManager.refreshTemplates();
+  } catch (error) {
+    console.error('Failed to refresh templates:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('show-folder-dialog', async () => {
   const win = BrowserWindow.getFocusedWindow() || mainWindow;
   
@@ -1744,6 +1771,45 @@ ipcMain.handle('add-recent-folder', async (event, folderPath) => {
   } catch (error) {
     console.error('Failed to add recent folder:', error);
     return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-help-content', async () => {
+  try {
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    // Get the path to the Help.md file in the public directory
+    let helpPath;
+    if (app.isPackaged) {
+      // In production, look in the app.asar archive
+      helpPath = path.join(process.resourcesPath, 'app.asar', 'public', 'Help.md');
+      
+      // If not found in asar, try unpacked
+      if (!require('fs').existsSync(helpPath)) {
+        helpPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'public', 'Help.md');
+      }
+      
+      // If still not found, try relative to the app path
+      if (!require('fs').existsSync(helpPath)) {
+        helpPath = path.join(app.getAppPath(), 'public', 'Help.md');
+      }
+    } else {
+      // In development, use the public directory
+      helpPath = path.join(app.getAppPath(), 'public', 'Help.md');
+    }
+    
+    console.log('Looking for Help.md at:', helpPath);
+    
+    const content = await fs.readFile(helpPath, 'utf-8');
+    return { success: true, content };
+  } catch (error) {
+    console.error('Failed to read help content:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      content: `# Help Not Available\n\nSorry, the help documentation could not be loaded.\n\nError: ${error.message}\n\nPlease visit [GitHub](https://github.com/stacylacy/willisMD) for online documentation.`
+    };
   }
 });
 

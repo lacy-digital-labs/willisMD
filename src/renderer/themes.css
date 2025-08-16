@@ -1,8 +1,8 @@
-/* Theme System for willisMD */
+/* Enhanced Theme System for willisMD - Light/Dark Mode Support */
 
 /* CSS Custom Properties for theming */
 :root {
-  /* Default Light Theme */
+  /* Default Standard Light Theme */
   --bg-primary: #ffffff;
   --bg-secondary: #f8f8f8;
   --bg-tertiary: #f0f0f0;
@@ -43,7 +43,753 @@
   --shadow-heavy: rgba(0, 0, 0, 0.25);
 }
 
-/* Dark Theme */
+/* ==================== STANDARD THEME ==================== */
+
+/* Standard Dark Mode */
+[data-theme="standard"][data-mode="dark"] {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --bg-accent: #4a4a4a;
+  
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --text-inverse: #000000;
+  
+  --border-light: #404040;
+  --border-medium: #555555;
+  --border-dark: #666666;
+  
+  --accent-primary: #4a9eff;
+  --accent-hover: #357abd;
+  --accent-light: #1a2332;
+  
+  --success: #28a745;
+  --warning: #ffc107;
+  --error: #dc3545;
+  --info: #17a2b8;
+  
+  --editor-bg: #1e1e1e;
+  --editor-text: #e0e0e0;
+  --editor-selection: #264f78;
+  
+  --preview-bg: #252526;
+  --preview-text: #cccccc;
+  
+  --syntax-keyword: #569cd6;
+  --syntax-string: #ce9178;
+  --syntax-comment: #6a9955;
+  --syntax-number: #b5cea8;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== FOREST GREEN THEME ==================== */
+
+/* Forest Green Light Mode */
+[data-theme="forest-green"][data-mode="light"],
+[data-theme="forest-green"]:not([data-mode]) {
+  --bg-primary: #f0f4f0;
+  --bg-secondary: #e8f0e8;
+  --bg-tertiary: #d8e8d8;
+  --bg-accent: #c8dcc8;
+  
+  --text-primary: #2d4a2d;
+  --text-secondary: #3d5a3d;
+  --text-muted: #6b8a6b;
+  --text-inverse: #ffffff;
+  
+  --border-light: #c0d0c0;
+  --border-medium: #a0c0a0;
+  --border-dark: #809080;
+  
+  --accent-primary: #228b22;
+  --accent-hover: #196619;
+  --accent-light: #e8f5e8;
+  
+  --success: #32cd32;
+  --warning: #daa520;
+  --error: #cd5c5c;
+  --info: #20b2aa;
+  
+  --editor-bg: #f8fdf8;
+  --editor-text: #2d4a2d;
+  --editor-selection: #c8e6c8;
+  
+  --preview-bg: #f0f8f0;
+  --preview-text: #2d4a2d;
+  
+  --syntax-keyword: #006400;
+  --syntax-string: #228b22;
+  --syntax-comment: #6b8e23;
+  --syntax-number: #ff8c00;
+  
+  --shadow-light: rgba(45, 74, 45, 0.1);
+  --shadow-medium: rgba(45, 74, 45, 0.15);
+  --shadow-heavy: rgba(45, 74, 45, 0.25);
+}
+
+/* Forest Green Dark Mode */
+[data-theme="forest-green"][data-mode="dark"] {
+  --bg-primary: #1a2e1a;
+  --bg-secondary: #243624;
+  --bg-tertiary: #2e3e2e;
+  --bg-accent: #384638;
+  
+  --text-primary: #c8e6c8;
+  --text-secondary: #a8d6a8;
+  --text-muted: #88b688;
+  --text-inverse: #000000;
+  
+  --border-light: #384638;
+  --border-medium: #4a5a4a;
+  --border-dark: #5c6e5c;
+  
+  --accent-primary: #32cd32;
+  --accent-hover: #28a745;
+  --accent-light: #1a2e1a;
+  
+  --success: #40e240;
+  --warning: #ffda44;
+  --error: #ff6b6b;
+  --info: #4ecdc4;
+  
+  --editor-bg: #1a2e1a;
+  --editor-text: #c8e6c8;
+  --editor-selection: #2e4a2e;
+  
+  --preview-bg: #1e2e1e;
+  --preview-text: #c8e6c8;
+  
+  --syntax-keyword: #7ed67e;
+  --syntax-string: #90ee90;
+  --syntax-comment: #8fbc8f;
+  --syntax-number: #ffa500;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== BLUE MOON THEME ==================== */
+
+/* Blue Moon Light Mode */
+[data-theme="blue-moon"][data-mode="light"],
+[data-theme="blue-moon"]:not([data-mode]) {
+  --bg-primary: #f0f4ff;
+  --bg-secondary: #e8f0ff;
+  --bg-tertiary: #d8e8ff;
+  --bg-accent: #c8dcff;
+  
+  --text-primary: #1a237e;
+  --text-secondary: #283593;
+  --text-muted: #5c6bc0;
+  --text-inverse: #ffffff;
+  
+  --border-light: #c0d0ff;
+  --border-medium: #a0c0ff;
+  --border-dark: #8090ff;
+  
+  --accent-primary: #3f51b5;
+  --accent-hover: #303f9f;
+  --accent-light: #e8eaf6;
+  
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --info: #2196f3;
+  
+  --editor-bg: #f8faff;
+  --editor-text: #1a237e;
+  --editor-selection: #c8dcff;
+  
+  --preview-bg: #f0f4ff;
+  --preview-text: #1a237e;
+  
+  --syntax-keyword: #1976d2;
+  --syntax-string: #388e3c;
+  --syntax-comment: #7986cb;
+  --syntax-number: #ff5722;
+  
+  --shadow-light: rgba(26, 35, 126, 0.1);
+  --shadow-medium: rgba(26, 35, 126, 0.15);
+  --shadow-heavy: rgba(26, 35, 126, 0.25);
+}
+
+/* Blue Moon Dark Mode */
+[data-theme="blue-moon"][data-mode="dark"] {
+  --bg-primary: #0d1421;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #262b3b;
+  --bg-accent: #323748;
+  
+  --text-primary: #c8dcff;
+  --text-secondary: #a8ccff;
+  --text-muted: #88bbff;
+  --text-inverse: #000000;
+  
+  --border-light: #323748;
+  --border-medium: #424755;
+  --border-dark: #525762;
+  
+  --accent-primary: #6270ff;
+  --accent-hover: #4560ff;
+  --accent-light: #0d1421;
+  
+  --success: #5cff5c;
+  --warning: #ffb74d;
+  --error: #ff6b6b;
+  --info: #42a5f5;
+  
+  --editor-bg: #0d1421;
+  --editor-text: #c8dcff;
+  --editor-selection: #1a2e4a;
+  
+  --preview-bg: #111825;
+  --preview-text: #c8dcff;
+  
+  --syntax-keyword: #7cb3ff;
+  --syntax-string: #81c784;
+  --syntax-comment: #9fa8da;
+  --syntax-number: #ff8a65;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== MONOCHROME THEME ==================== */
+
+/* Monochrome Light Mode */
+[data-theme="monochrome"][data-mode="light"],
+[data-theme="monochrome"]:not([data-mode]) {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #eeeeee;
+  --bg-accent: #e0e0e0;
+  
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --text-inverse: #ffffff;
+  
+  --border-light: #e0e0e0;
+  --border-medium: #bdbdbd;
+  --border-dark: #9e9e9e;
+  
+  --accent-primary: #424242;
+  --accent-hover: #212121;
+  --accent-light: #f5f5f5;
+  
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --info: #2196f3;
+  
+  --editor-bg: #ffffff;
+  --editor-text: #000000;
+  --editor-selection: #e0e0e0;
+  
+  --preview-bg: #fafafa;
+  --preview-text: #000000;
+  
+  --syntax-keyword: #424242;
+  --syntax-string: #666666;
+  --syntax-comment: #9e9e9e;
+  --syntax-number: #212121;
+  
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-heavy: rgba(0, 0, 0, 0.25);
+}
+
+/* Monochrome Dark Mode */
+[data-theme="monochrome"][data-mode="dark"] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+  --bg-accent: #363636;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #b0b0b0;
+  --text-inverse: #000000;
+  
+  --border-light: #363636;
+  --border-medium: #4a4a4a;
+  --border-dark: #5e5e5e;
+  
+  --accent-primary: #bdbdbd;
+  --accent-hover: #e0e0e0;
+  --accent-light: #1e1e1e;
+  
+  --success: #66bb6a;
+  --warning: #ffb74d;
+  --error: #ef5350;
+  --info: #42a5f5;
+  
+  --editor-bg: #121212;
+  --editor-text: #ffffff;
+  --editor-selection: #363636;
+  
+  --preview-bg: #181818;
+  --preview-text: #ffffff;
+  
+  --syntax-keyword: #e0e0e0;
+  --syntax-string: #b0b0b0;
+  --syntax-comment: #808080;
+  --syntax-number: #ffffff;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== VALENTINE THEME ==================== */
+
+/* Valentine Light Mode */
+[data-theme="valentine"][data-mode="light"],
+[data-theme="valentine"]:not([data-mode]) {
+  --bg-primary: #fff0f5;
+  --bg-secondary: #ffe4e9;
+  --bg-tertiary: #ffc0cb;
+  --bg-accent: #ffb6c1;
+  
+  --text-primary: #8b0000;
+  --text-secondary: #a0002a;
+  --text-muted: #cd5c5c;
+  --text-inverse: #ffffff;
+  
+  --border-light: #ffc0cb;
+  --border-medium: #ff91a4;
+  --border-dark: #ff6b8a;
+  
+  --accent-primary: #dc143c;
+  --accent-hover: #b91c3c;
+  --accent-light: #ffe4e9;
+  
+  --success: #ff69b4;
+  --warning: #ff8c69;
+  --error: #cd5c5c;
+  --info: #da70d6;
+  
+  --editor-bg: #fff8fa;
+  --editor-text: #8b0000;
+  --editor-selection: #ffe4e9;
+  
+  --preview-bg: #fff0f5;
+  --preview-text: #8b0000;
+  
+  --syntax-keyword: #dc143c;
+  --syntax-string: #ff1493;
+  --syntax-comment: #db7093;
+  --syntax-number: #ff69b4;
+  
+  --shadow-light: rgba(219, 112, 147, 0.1);
+  --shadow-medium: rgba(219, 112, 147, 0.15);
+  --shadow-heavy: rgba(219, 112, 147, 0.25);
+}
+
+/* Valentine Dark Mode */
+[data-theme="valentine"][data-mode="dark"] {
+  --bg-primary: #2a1218;
+  --bg-secondary: #3a1a24;
+  --bg-tertiary: #4a2230;
+  --bg-accent: #5a2a3c;
+  
+  --text-primary: #ffb6c1;
+  --text-secondary: #ff91a4;
+  --text-muted: #ff7a9a;
+  --text-inverse: #000000;
+  
+  --border-light: #5a2a3c;
+  --border-medium: #6a3248;
+  --border-dark: #7a3a54;
+  
+  --accent-primary: #ff69b4;
+  --accent-hover: #ff1493;
+  --accent-light: #2a1218;
+  
+  --success: #ff8fa3;
+  --warning: #ffb380;
+  --error: #ff6b80;
+  --info: #e591e5;
+  
+  --editor-bg: #2a1218;
+  --editor-text: #ffb6c1;
+  --editor-selection: #4a223a;
+  
+  --preview-bg: #2e161c;
+  --preview-text: #ffb6c1;
+  
+  --syntax-keyword: #ff69b4;
+  --syntax-string: #ff91a4;
+  --syntax-comment: #db7093;
+  --syntax-number: #ffc0cb;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== DESERT THEME ==================== */
+
+/* Desert Light Mode */
+[data-theme="desert"][data-mode="light"],
+[data-theme="desert"]:not([data-mode]) {
+  --bg-primary: #faf0e6;
+  --bg-secondary: #f5e6d3;
+  --bg-tertiary: #eeddcc;
+  --bg-accent: #e6d2b5;
+  
+  --text-primary: #5d4037;
+  --text-secondary: #6d4c41;
+  --text-muted: #8d6e63;
+  --text-inverse: #ffffff;
+  
+  --border-light: #d2b48c;
+  --border-medium: #c19a6b;
+  --border-dark: #a0825a;
+  
+  --accent-primary: #8d4004;
+  --accent-hover: #6a3003;
+  --accent-light: #f5e6d3;
+  
+  --success: #8bc34a;
+  --warning: #ff9800;
+  --error: #f44336;
+  --info: #00bcd4;
+  
+  --editor-bg: #fdf6ed;
+  --editor-text: #5d4037;
+  --editor-selection: #e6d2b5;
+  
+  --preview-bg: #faf0e6;
+  --preview-text: #5d4037;
+  
+  --syntax-keyword: #8d4004;
+  --syntax-string: #689f38;
+  --syntax-comment: #a1887f;
+  --syntax-number: #ff6f00;
+  
+  --shadow-light: rgba(93, 64, 55, 0.1);
+  --shadow-medium: rgba(93, 64, 55, 0.15);
+  --shadow-heavy: rgba(93, 64, 55, 0.25);
+}
+
+/* Desert Dark Mode */
+[data-theme="desert"][data-mode="dark"] {
+  --bg-primary: #2a1e14;
+  --bg-secondary: #3a2918;
+  --bg-tertiary: #4a341c;
+  --bg-accent: #5a3f20;
+  
+  --text-primary: #e6d2b5;
+  --text-secondary: #d6c2a5;
+  --text-muted: #c6b295;
+  --text-inverse: #000000;
+  
+  --border-light: #5a3f20;
+  --border-medium: #6a4924;
+  --border-dark: #7a5328;
+  
+  --accent-primary: #d2b48c;
+  --accent-hover: #f4a460;
+  --accent-light: #2a1e14;
+  
+  --success: #9ccc65;
+  --warning: #ffb74d;
+  --error: #ef5350;
+  --info: #26c6da;
+  
+  --editor-bg: #2a1e14;
+  --editor-text: #e6d2b5;
+  --editor-selection: #4a2e1c;
+  
+  --preview-bg: #2e2218;
+  --preview-text: #e6d2b5;
+  
+  --syntax-keyword: #d2b48c;
+  --syntax-string: #aed581;
+  --syntax-comment: #bcaaa4;
+  --syntax-number: #ffab40;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== POLAR THEME ==================== */
+
+/* Polar Light Mode */
+[data-theme="polar"][data-mode="light"],
+[data-theme="polar"]:not([data-mode]) {
+  --bg-primary: #f0f8ff;
+  --bg-secondary: #e6f2ff;
+  --bg-tertiary: #d6ebff;
+  --bg-accent: #c7e3ff;
+  
+  --text-primary: #0c3b6d;
+  --text-secondary: #1565c0;
+  --text-muted: #42a5f5;
+  --text-inverse: #ffffff;
+  
+  --border-light: #b3d9ff;
+  --border-medium: #81c7ff;
+  --border-dark: #4fc3f7;
+  
+  --accent-primary: #0277bd;
+  --accent-hover: #01579b;
+  --accent-light: #e1f5fe;
+  
+  --success: #00e676;
+  --warning: #ffca28;
+  --error: #ff5252;
+  --info: #00bcd4;
+  
+  --editor-bg: #f8fcff;
+  --editor-text: #0c3b6d;
+  --editor-selection: #c7e3ff;
+  
+  --preview-bg: #f0f8ff;
+  --preview-text: #0c3b6d;
+  
+  --syntax-keyword: #0277bd;
+  --syntax-string: #00695c;
+  --syntax-comment: #607d8b;
+  --syntax-number: #ff6f00;
+  
+  --shadow-light: rgba(12, 59, 109, 0.1);
+  --shadow-medium: rgba(12, 59, 109, 0.15);
+  --shadow-heavy: rgba(12, 59, 109, 0.25);
+}
+
+/* Polar Dark Mode */
+[data-theme="polar"][data-mode="dark"] {
+  --bg-primary: #0a1829;
+  --bg-secondary: #122436;
+  --bg-tertiary: #1a3043;
+  --bg-accent: #223c50;
+  
+  --text-primary: #c7e3ff;
+  --text-secondary: #b3d9ff;
+  --text-muted: #9fcfff;
+  --text-inverse: #000000;
+  
+  --border-light: #223c50;
+  --border-medium: #2a485d;
+  --border-dark: #32546a;
+  
+  --accent-primary: #4fc3f7;
+  --accent-hover: #29b6f6;
+  --accent-light: #0a1829;
+  
+  --success: #26ff8b;
+  --warning: #ffd54f;
+  --error: #ff6659;
+  --info: #26c6da;
+  
+  --editor-bg: #0a1829;
+  --editor-text: #c7e3ff;
+  --editor-selection: #1a2e45;
+  
+  --preview-bg: #0e1c2d;
+  --preview-text: #c7e3ff;
+  
+  --syntax-keyword: #4fc3f7;
+  --syntax-string: #4db6ac;
+  --syntax-comment: #78909c;
+  --syntax-number: #ffab40;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== ORANGE BLOSSOM THEME ==================== */
+
+/* Orange Blossom Light Mode */
+[data-theme="orange-blossom"][data-mode="light"],
+[data-theme="orange-blossom"]:not([data-mode]) {
+  --bg-primary: #fff8f0;
+  --bg-secondary: #fff3e0;
+  --bg-tertiary: #ffe8cc;
+  --bg-accent: #ffddb3;
+  
+  --text-primary: #5d2f00;
+  --text-secondary: #7d3f00;
+  --text-muted: #a15600;
+  --text-inverse: #ffffff;
+  
+  --border-light: #ffcc99;
+  --border-medium: #ffb366;
+  --border-dark: #ff9933;
+  
+  --accent-primary: #ff6f00;
+  --accent-hover: #e65100;
+  --accent-light: #fff3e0;
+  
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --info: #2196f3;
+  
+  --editor-bg: #fffcf8;
+  --editor-text: #5d2f00;
+  --editor-selection: #ffddb3;
+  
+  --preview-bg: #fff8f0;
+  --preview-text: #5d2f00;
+  
+  --syntax-keyword: #ff6f00;
+  --syntax-string: #388e3c;
+  --syntax-comment: #bc7b37;
+  --syntax-number: #e65100;
+  
+  --shadow-light: rgba(93, 47, 0, 0.1);
+  --shadow-medium: rgba(93, 47, 0, 0.15);
+  --shadow-heavy: rgba(93, 47, 0, 0.25);
+}
+
+/* Orange Blossom Dark Mode */
+[data-theme="orange-blossom"][data-mode="dark"] {
+  --bg-primary: #2a1708;
+  --bg-secondary: #3a200a;
+  --bg-tertiary: #4a290c;
+  --bg-accent: #5a320e;
+  
+  --text-primary: #ffddb3;
+  --text-secondary: #ffcc99;
+  --text-muted: #ffbb7f;
+  --text-inverse: #000000;
+  
+  --border-light: #5a320e;
+  --border-medium: #6a3b10;
+  --border-dark: #7a4412;
+  
+  --accent-primary: #ff9933;
+  --accent-hover: #ffb366;
+  --accent-light: #2a1708;
+  
+  --success: #66bb6a;
+  --warning: #ffb74d;
+  --error: #ef5350;
+  --info: #42a5f5;
+  
+  --editor-bg: #2a1708;
+  --editor-text: #ffddb3;
+  --editor-selection: #4a2314;
+  
+  --preview-bg: #2e1b0c;
+  --preview-text: #ffddb3;
+  
+  --syntax-keyword: #ff9933;
+  --syntax-string: #81c784;
+  --syntax-comment: #d4a574;
+  --syntax-number: #ffab40;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== CHRISTMAS THEME ==================== */
+
+/* Christmas Light Mode */
+[data-theme="christmas"][data-mode="light"],
+[data-theme="christmas"]:not([data-mode]) {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5fffa;
+  --bg-tertiary: #f0fff0;
+  --bg-accent: #e6ffe6;
+  
+  --text-primary: #0d5016;
+  --text-secondary: #1b5e20;
+  --text-muted: #388e3c;
+  --text-inverse: #ffffff;
+  
+  --border-light: #c8e6c8;
+  --border-medium: #a5d6a7;
+  --border-dark: #81c784;
+  
+  --accent-primary: #d32f2f;
+  --accent-hover: #b71c1c;
+  --accent-light: #ffebee;
+  
+  --success: #4caf50;
+  --warning: #ffc107;
+  --error: #f44336;
+  --info: #2196f3;
+  
+  --editor-bg: #feffff;
+  --editor-text: #0d5016;
+  --editor-selection: #e6ffe6;
+  
+  --preview-bg: #ffffff;
+  --preview-text: #0d5016;
+  
+  --syntax-keyword: #d32f2f;
+  --syntax-string: #2e7d32;
+  --syntax-comment: #689f38;
+  --syntax-number: #ff8f00;
+  
+  --shadow-light: rgba(13, 80, 22, 0.1);
+  --shadow-medium: rgba(13, 80, 22, 0.15);
+  --shadow-heavy: rgba(13, 80, 22, 0.25);
+}
+
+/* Christmas Dark Mode */
+[data-theme="christmas"][data-mode="dark"] {
+  --bg-primary: #0f1e0f;
+  --bg-secondary: #1a2e1a;
+  --bg-tertiary: #253e25;
+  --bg-accent: #304e30;
+  
+  --text-primary: #c8e6c8;
+  --text-secondary: #a5d6a7;
+  --text-muted: #81c784;
+  --text-inverse: #000000;
+  
+  --border-light: #304e30;
+  --border-medium: #3b5e3b;
+  --border-dark: #466e46;
+  
+  --accent-primary: #ef5350;
+  --accent-hover: #f44336;
+  --accent-light: #0f1e0f;
+  
+  --success: #66bb6a;
+  --warning: #ffca28;
+  --error: #ff6659;
+  --info: #42a5f5;
+  
+  --editor-bg: #0f1e0f;
+  --editor-text: #c8e6c8;
+  --editor-selection: #253e25;
+  
+  --preview-bg: #132213;
+  --preview-text: #c8e6c8;
+  
+  --syntax-keyword: #ef5350;
+  --syntax-string: #81c784;
+  --syntax-comment: #9ccc65;
+  --syntax-number: #ffb74d;
+  
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== BACKWARDS COMPATIBILITY ==================== */
+
+/* Support for old theme names without mode specification */
+[data-theme="light"] {
+  /* Already covered by :root default */
+}
+
 [data-theme="dark"] {
   --bg-primary: #1e1e1e;
   --bg-secondary: #2d2d2d;
@@ -85,341 +831,19 @@
   --shadow-heavy: rgba(0, 0, 0, 0.6);
 }
 
-/* Forest Green Theme */
-[data-theme="forest-green"] {
-  --bg-primary: #f0f4f0;
-  --bg-secondary: #e8f0e8;
-  --bg-tertiary: #d8e8d8;
-  --bg-accent: #c8dcc8;
-  
-  --text-primary: #2d4a2d;
-  --text-secondary: #3d5a3d;
-  --text-muted: #6b8a6b;
-  --text-inverse: #ffffff;
-  
-  --border-light: #c0d0c0;
-  --border-medium: #a0c0a0;
-  --border-dark: #809080;
-  
-  --accent-primary: #228b22;
-  --accent-hover: #196619;
-  --accent-light: #e8f5e8;
-  
-  --success: #32cd32;
-  --warning: #daa520;
-  --error: #cd5c5c;
-  --info: #20b2aa;
-  
-  --editor-bg: #f8fdf8;
-  --editor-text: #2d4a2d;
-  --editor-selection: #c8e6c8;
-  
-  --preview-bg: #f0f8f0;
-  --preview-text: #2d4a2d;
-  
-  --syntax-keyword: #006400;
-  --syntax-string: #228b22;
-  --syntax-comment: #6b8e23;
-  --syntax-number: #ff8c00;
-  
-  --shadow-light: rgba(45, 74, 45, 0.1);
-  --shadow-medium: rgba(45, 74, 45, 0.15);
-  --shadow-heavy: rgba(45, 74, 45, 0.25);
+/* Backwards compatibility for themes without mode */
+[data-theme="forest-green"]:not([data-mode]),
+[data-theme="blue-moon"]:not([data-mode]),
+[data-theme="monochrome"]:not([data-mode]),
+[data-theme="valentine"]:not([data-mode]),
+[data-theme="desert"]:not([data-mode]),
+[data-theme="polar"]:not([data-mode]),
+[data-theme="orange-blossom"]:not([data-mode]),
+[data-theme="christmas"]:not([data-mode]) {
+  /* Light mode is applied by default via the specific rules above */
 }
 
-/* Blue Moon Theme */
-[data-theme="blue-moon"] {
-  --bg-primary: #f0f4ff;
-  --bg-secondary: #e8f0ff;
-  --bg-tertiary: #d8e8ff;
-  --bg-accent: #c8dcff;
-  
-  --text-primary: #1a237e;
-  --text-secondary: #283593;
-  --text-muted: #5c6bc0;
-  --text-inverse: #ffffff;
-  
-  --border-light: #c0d0ff;
-  --border-medium: #a0c0ff;
-  --border-dark: #8090ff;
-  
-  --accent-primary: #3f51b5;
-  --accent-hover: #303f9f;
-  --accent-light: #e8eaf6;
-  
-  --success: #4caf50;
-  --warning: #ff9800;
-  --error: #f44336;
-  --info: #2196f3;
-  
-  --editor-bg: #f8faff;
-  --editor-text: #1a237e;
-  --editor-selection: #c8d6ff;
-  
-  --preview-bg: #f0f4ff;
-  --preview-text: #1a237e;
-  
-  --syntax-keyword: #1565c0;
-  --syntax-string: #0277bd;
-  --syntax-comment: #607d8b;
-  --syntax-number: #ff5722;
-  
-  --shadow-light: rgba(26, 35, 126, 0.1);
-  --shadow-medium: rgba(26, 35, 126, 0.15);
-  --shadow-heavy: rgba(26, 35, 126, 0.25);
-}
-
-/* Monochrome Theme */
-[data-theme="monochrome"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --bg-tertiary: #eeeeee;
-  --bg-accent: #e0e0e0;
-  
-  --text-primary: #000000;
-  --text-secondary: #424242;
-  --text-muted: #757575;
-  --text-inverse: #ffffff;
-  
-  --border-light: #e0e0e0;
-  --border-medium: #bdbdbd;
-  --border-dark: #9e9e9e;
-  
-  --accent-primary: #424242;
-  --accent-hover: #212121;
-  --accent-light: #f5f5f5;
-  
-  --success: #4caf50;
-  --warning: #ff9800;
-  --error: #f44336;
-  --info: #2196f3;
-  
-  --editor-bg: #ffffff;
-  --editor-text: #000000;
-  --editor-selection: #e0e0e0;
-  
-  --preview-bg: #fafafa;
-  --preview-text: #000000;
-  
-  --syntax-keyword: #000000;
-  --syntax-string: #424242;
-  --syntax-comment: #757575;
-  --syntax-number: #424242;
-  
-  --shadow-light: rgba(0, 0, 0, 0.1);
-  --shadow-medium: rgba(0, 0, 0, 0.15);
-  --shadow-heavy: rgba(0, 0, 0, 0.25);
-}
-
-/* Valentine Theme - Romantic reds, pinks, and soft purples */
-[data-theme="valentine"] {
-  --bg-primary: #fff0f5;
-  --bg-secondary: #ffe4e9;
-  --bg-tertiary: #ffc0cb;
-  --bg-accent: #ffb6c1;
-  
-  --text-primary: #8b1538;
-  --text-secondary: #c71585;
-  --text-muted: #db7093;
-  --text-inverse: #ffffff;
-  
-  --border-light: #ffc0cb;
-  --border-medium: #ff69b4;
-  --border-dark: #ff1493;
-  
-  --accent-primary: #dc143c;
-  --accent-hover: #c71585;
-  --accent-light: #fff0f5;
-  
-  --success: #32cd32;
-  --warning: #ff69b4;
-  --error: #dc143c;
-  --info: #da70d6;
-  
-  --editor-bg: #fff5f7;
-  --editor-text: #8b1538;
-  --editor-selection: #ffb6c1;
-  
-  --preview-bg: #fff0f5;
-  --preview-text: #8b1538;
-  
-  --syntax-keyword: #dc143c;
-  --syntax-string: #c71585;
-  --syntax-comment: #db7093;
-  --syntax-number: #ff1493;
-  
-  --shadow-light: rgba(219, 112, 147, 0.1);
-  --shadow-medium: rgba(219, 112, 147, 0.15);
-  --shadow-heavy: rgba(219, 112, 147, 0.25);
-}
-
-/* Desert Theme - Warm earth tones and sandy colors */
-[data-theme="desert"] {
-  --bg-primary: #faf0e6;
-  --bg-secondary: #f5e6d3;
-  --bg-tertiary: #eeddcc;
-  --bg-accent: #e6d2b5;
-  
-  --text-primary: #5d4037;
-  --text-secondary: #6d4c41;
-  --text-muted: #8d6e63;
-  --text-inverse: #ffffff;
-  
-  --border-light: #d7ccc8;
-  --border-medium: #bcaaa4;
-  --border-dark: #a1887f;
-  
-  --accent-primary: #bf6b04;
-  --accent-hover: #9e5a03;
-  --accent-light: #fff3e0;
-  
-  --success: #7cb342;
-  --warning: #ff8f00;
-  --error: #e64a19;
-  --info: #5d4037;
-  
-  --editor-bg: #fffaf5;
-  --editor-text: #5d4037;
-  --editor-selection: #ffe0b2;
-  
-  --preview-bg: #faf0e6;
-  --preview-text: #5d4037;
-  
-  --syntax-keyword: #bf6b04;
-  --syntax-string: #795548;
-  --syntax-comment: #8d6e63;
-  --syntax-number: #ff6f00;
-  
-  --shadow-light: rgba(93, 64, 55, 0.1);
-  --shadow-medium: rgba(93, 64, 55, 0.15);
-  --shadow-heavy: rgba(93, 64, 55, 0.25);
-}
-
-/* Polar Theme - Cool blues, whites, and icy teals */
-[data-theme="polar"] {
-  --bg-primary: #f0f8ff;
-  --bg-secondary: #e6f2ff;
-  --bg-tertiary: #d6ebff;
-  --bg-accent: #c7e3ff;
-  
-  --text-primary: #0c3b6d;
-  --text-secondary: #1e5490;
-  --text-muted: #5e8ab4;
-  --text-inverse: #ffffff;
-  
-  --border-light: #b3d9ff;
-  --border-medium: #80bfff;
-  --border-dark: #4da6ff;
-  
-  --accent-primary: #0080ff;
-  --accent-hover: #0066cc;
-  --accent-light: #e6f2ff;
-  
-  --success: #00bfa5;
-  --warning: #ff9800;
-  --error: #f44336;
-  --info: #00acc1;
-  
-  --editor-bg: #f5fbff;
-  --editor-text: #0c3b6d;
-  --editor-selection: #b3d9ff;
-  
-  --preview-bg: #f0f8ff;
-  --preview-text: #0c3b6d;
-  
-  --syntax-keyword: #0080ff;
-  --syntax-string: #00acc1;
-  --syntax-comment: #5e8ab4;
-  --syntax-number: #0066cc;
-  
-  --shadow-light: rgba(12, 59, 109, 0.1);
-  --shadow-medium: rgba(12, 59, 109, 0.15);
-  --shadow-heavy: rgba(12, 59, 109, 0.25);
-}
-
-/* Orange Blossom Theme - Vibrant oranges and complementary blues */
-[data-theme="orange-blossom"] {
-  --bg-primary: #fff8f0;
-  --bg-secondary: #fff3e0;
-  --bg-tertiary: #ffe8cc;
-  --bg-accent: #ffddb3;
-  
-  --text-primary: #5d2f00;
-  --text-secondary: #804020;
-  --text-muted: #a66829;
-  --text-inverse: #ffffff;
-  
-  --border-light: #ffcc99;
-  --border-medium: #ffb366;
-  --border-dark: #ff9933;
-  
-  --accent-primary: #ff7f00;
-  --accent-hover: #e67300;
-  --accent-light: #fff3e0;
-  
-  --success: #66bb6a;
-  --warning: #ffa726;
-  --error: #ef5350;
-  --info: #42a5f5;
-  
-  --editor-bg: #fffaf5;
-  --editor-text: #5d2f00;
-  --editor-selection: #ffcc99;
-  
-  --preview-bg: #fff8f0;
-  --preview-text: #5d2f00;
-  
-  --syntax-keyword: #ff7f00;
-  --syntax-string: #2196f3;
-  --syntax-comment: #a66829;
-  --syntax-number: #ff5722;
-  
-  --shadow-light: rgba(93, 47, 0, 0.1);
-  --shadow-medium: rgba(93, 47, 0, 0.15);
-  --shadow-heavy: rgba(93, 47, 0, 0.25);
-}
-
-/* Christmas Theme - Bright festive reds, greens, and yellows */
-[data-theme="christmas"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5fffa;
-  --bg-tertiary: #f0fff0;
-  --bg-accent: #e6ffe6;
-  
-  --text-primary: #006400;
-  --text-secondary: #dc143c;
-  --text-muted: #8b4513;
-  --text-inverse: #ffffff;
-  
-  --border-light: #90ee90;
-  --border-medium: #32cd32;
-  --border-dark: #228b22;
-  
-  --accent-primary: #ff0000;
-  --accent-hover: #dc143c;
-  --accent-light: #ffeeee;
-  
-  --success: #00ff00;
-  --warning: #ffff00;
-  --error: #ff0000;
-  --info: #ffd700;
-  
-  --editor-bg: #fffafa;
-  --editor-text: #006400;
-  --editor-selection: #ffff99;
-  
-  --preview-bg: #f5fffa;
-  --preview-text: #006400;
-  
-  --syntax-keyword: #ff0000;
-  --syntax-string: #00ff00;
-  --syntax-comment: #8b4513;
-  --syntax-number: #ffff00;
-  
-  --shadow-light: rgba(0, 100, 0, 0.1);
-  --shadow-medium: rgba(0, 100, 0, 0.15);
-  --shadow-heavy: rgba(0, 100, 0, 0.25);
-}
+/* ==================== COMPONENT STYLING ==================== */
 
 /* Apply theme variables to components */
 body {
@@ -492,6 +916,19 @@ body {
 .preview {
   background-color: var(--preview-bg);
   color: var(--preview-text);
+}
+
+/* Force preview content to use theme colors */
+.preview .preview-content {
+  color: var(--preview-text) !important;
+}
+
+.preview .preview-content p,
+.preview .preview-content div,
+.preview .preview-content span,
+.preview .preview-content li,
+.preview .preview-content td {
+  color: var(--preview-text) !important;
 }
 
 .preview h1, .preview h2, .preview h3, .preview h4, .preview h5, .preview h6 {
@@ -635,4 +1072,88 @@ input:focus, textarea:focus, select:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-dark);
+}
+
+/* File Explorer specific styling */
+.file-explorer-item {
+  color: var(--text-primary) !important;
+}
+
+.file-explorer-item:hover {
+  background-color: var(--bg-accent) !important;
+}
+
+.file-explorer-icon {
+  color: var(--text-secondary) !important;
+}
+
+.file-explorer-folder-name {
+  color: var(--text-primary) !important;
+}
+
+.file-explorer-header {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+/* Context Menu styling */
+.context-menu {
+  background-color: var(--bg-primary) !important;
+  border: 1px solid var(--border-medium) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 12px var(--shadow-medium) !important;
+}
+
+.context-menu-item {
+  color: var(--text-primary) !important;
+}
+
+.context-menu-item:hover {
+  background-color: var(--bg-accent) !important;
+}
+
+.context-menu-item.delete {
+  color: var(--error) !important;
+}
+
+.context-menu-item.delete:hover {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.context-menu-separator {
+  background-color: var(--border-light) !important;
+}
+
+/* Toolbar and button styling */
+.toolbar-button {
+  background-color: var(--bg-accent) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-medium) !important;
+}
+
+.toolbar-button:hover {
+  background-color: var(--accent-primary) !important;
+  color: var(--text-inverse) !important;
+}
+
+/* Status bar styling */
+.status-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Resizer styling */
+.resizer {
+  background-color: var(--border-medium) !important;
+}
+
+.resizer:hover {
+  background-color: var(--border-dark) !important;
+}
+
+/* Section header styling */
+.section-header {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-light) !important;
 }
