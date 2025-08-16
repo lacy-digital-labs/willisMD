@@ -176,6 +176,10 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
   const [loading, setLoading] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [showInputDialog, setShowInputDialog] = useState(null);
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
   
   // Internal refresh function
   const refreshExplorer = () => {
@@ -190,8 +194,15 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
 
   // Expose refresh method to parent
   React.useImperativeHandle(ref, () => ({
-    refresh: refreshExplorer
-  }), [currentFolder, expandedFolders]);
+    refresh: refreshExplorer,
+    toggleSearch: () => {
+      setSearchMode(prev => !prev);
+      if (!searchMode) {
+        setSearchTerm('');
+        setSearchResults(null);
+      }
+    }
+  }), [currentFolder, expandedFolders, searchMode]);
   
   useEffect(() => {
     if (currentFolder) {
@@ -390,6 +401,53 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
     setContextMenu(null);
   };
   
+  // Search functionality
+  const handleSearch = async () => {
+    if (!searchTerm.trim() || !currentFolder) return;
+    
+    setSearchLoading(true);
+    try {
+      const result = await window.electronAPI.searchInFiles({
+        searchPath: currentFolder,
+        searchTerm: searchTerm.trim(),
+        options: {
+          caseSensitive: false,
+          maxResults: 100
+        }
+      });
+      
+      if (result.success) {
+        setSearchResults(result);
+      } else {
+        console.error('Search failed:', result.error);
+        setSearchResults({ results: [], totalFiles: 0, error: result.error });
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults({ results: [], totalFiles: 0, error: error.message });
+    }
+    setSearchLoading(false);
+  };
+  
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    } else if (e.key === 'Escape') {
+      setSearchMode(false);
+      setSearchTerm('');
+      setSearchResults(null);
+    }
+  };
+  
+  const handleSearchResultClick = (filePath) => {
+    // Open the file
+    onFileClick(filePath);
+    // Optionally close search
+    setSearchMode(false);
+    setSearchTerm('');
+    setSearchResults(null);
+  };
+
   // Close context menu when clicking elsewhere
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
@@ -513,19 +571,160 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
       }
     }, currentFolder.split('/').pop() || currentFolder),
     
+    // Search bar
+    searchMode && React.createElement('div', {
+      style: {
+        padding: '8px',
+        borderBottom: '1px solid var(--border-light)',
+        backgroundColor: 'var(--bg-secondary)'
+      }
+    },
+      React.createElement('div', {
+        style: {
+          display: 'flex',
+          gap: '8px'
+        }
+      },
+        React.createElement('input', {
+          type: 'text',
+          placeholder: 'Search for text in files...',
+          value: searchTerm,
+          onChange: (e) => setSearchTerm(e.target.value),
+          onKeyDown: handleSearchKeyDown,
+          style: {
+            flex: 1,
+            padding: '4px 8px',
+            fontSize: '12px',
+            border: '1px solid var(--border-medium)',
+            borderRadius: '3px',
+            outline: 'none',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)'
+          },
+          autoFocus: true
+        }),
+        React.createElement('button', {
+          onClick: handleSearch,
+          disabled: searchLoading || !searchTerm.trim(),
+          style: {
+            padding: '4px 12px',
+            fontSize: '12px',
+            cursor: searchLoading || !searchTerm.trim() ? 'not-allowed' : 'pointer',
+            backgroundColor: 'var(--button-primary-bg)',
+            color: 'var(--button-primary-text)',
+            border: 'none',
+            borderRadius: '3px',
+            opacity: searchLoading || !searchTerm.trim() ? 0.5 : 1
+          }
+        }, searchLoading ? 'Searching...' : 'Search')
+      )
+    ),
+    
     // Contents
     React.createElement('div', {
       style: { padding: '8px' }
     },
-      loading ? 
-        React.createElement('div', {
-          style: { 
-            textAlign: 'center',
-            color: 'var(--text-secondary)',
-            padding: '20px'
-          }
-        }, 'Loading...') :
-        folderContents.map(item => renderItem(item, 0))
+      searchMode && searchResults ? (
+        // Show search results
+        React.createElement('div', null,
+          searchResults.error ? 
+            React.createElement('div', {
+              style: {
+                color: 'var(--error, #d32f2f)',
+                padding: '10px',
+                fontSize: '12px'
+              }
+            }, `Error: ${searchResults.error}`) :
+          searchResults.results.length === 0 ?
+            React.createElement('div', {
+              style: {
+                textAlign: 'center',
+                color: 'var(--text-secondary)',
+                padding: '20px',
+                fontSize: '12px'
+              }
+            }, `No results found for "${searchResults.searchTerm}"`) :
+            React.createElement('div', null,
+              React.createElement('div', {
+                style: {
+                  marginBottom: '8px',
+                  fontSize: '11px',
+                  color: 'var(--text-secondary)'
+                }
+              }, `Found in ${searchResults.totalFiles} file${searchResults.totalFiles !== 1 ? 's' : ''}:`),
+              searchResults.results.map(result => 
+                React.createElement('div', {
+                  key: result.filePath,
+                  style: {
+                    marginBottom: '12px',
+                    padding: '8px',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '4px',
+                    border: '1px solid var(--border-light)'
+                  }
+                },
+                  React.createElement('div', {
+                    style: {
+                      fontWeight: 'bold',
+                      fontSize: '12px',
+                      color: 'var(--link-color)',
+                      cursor: 'pointer',
+                      marginBottom: '4px'
+                    },
+                    onClick: () => handleSearchResultClick(result.filePath),
+                    onMouseEnter: (e) => e.target.style.textDecoration = 'underline',
+                    onMouseLeave: (e) => e.target.style.textDecoration = 'none'
+                  }, '📄 ' + result.fileName),
+                  React.createElement('div', {
+                    style: {
+                      fontSize: '10px',
+                      color: 'var(--text-secondary)',
+                      marginBottom: '4px'
+                    }
+                  }, result.relativePath),
+                  React.createElement('div', {
+                    style: {
+                      fontSize: '11px',
+                      color: 'var(--text-primary)',
+                      marginLeft: '12px'
+                    }
+                  },
+                    result.matches.slice(0, 3).map((match, index) =>
+                      React.createElement('div', {
+                        key: index,
+                        style: {
+                          marginBottom: '2px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }
+                      }, `Line ${match.lineNumber}: ${match.preview}`)
+                    ),
+                    result.totalMatches > 3 && React.createElement('div', {
+                      style: {
+                        fontSize: '10px',
+                        color: 'var(--text-secondary)',
+                        fontStyle: 'italic',
+                        marginTop: '2px'
+                      }
+                    }, `...and ${result.totalMatches - 3} more match${result.totalMatches - 3 !== 1 ? 'es' : ''}`)
+                  )
+                )
+              )
+            )
+        )
+      ) : (
+        // Show normal file tree
+        loading ? 
+          React.createElement('div', {
+            style: { 
+              textAlign: 'center',
+              color: 'var(--text-secondary)',
+              padding: '20px'
+            }
+          }, 'Loading...') :
+          folderContents.map(item => renderItem(item, 0))
+      )
     ),
     
     // Context menu
@@ -1789,6 +1988,7 @@ function App() {
   // Panel visibility state
   const [isExplorerVisible, setIsExplorerVisible] = useState(true);
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
+  const [searchMode, setSearchMode] = useState(false);
   
   // Panel width state
   const [explorerWidth, setExplorerWidth] = useState(250);
@@ -3144,7 +3344,28 @@ function App() {
               onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
               onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
               title: 'Refresh Explorer'
-            }, '🔄')
+            }, '🔄'),
+            React.createElement('button', {
+              style: {
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '3px',
+                fontSize: '14px',
+                color: searchMode ? 'var(--button-primary-bg)' : 'var(--text-secondary)',
+                marginLeft: 'auto'
+              },
+              onClick: () => {
+                setSearchMode(!searchMode);
+                if (fileExplorerRef.current) {
+                  fileExplorerRef.current.toggleSearch();
+                }
+              },
+              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
+              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
+              title: 'Search in folder'
+            }, '🔍')
           )
         ),
         React.createElement(FileExplorer, {

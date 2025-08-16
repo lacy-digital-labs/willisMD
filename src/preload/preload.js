@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeFile: (filePath, content) => ipcRenderer.invoke('write-file', filePath, content),
   showSaveDialog: () => ipcRenderer.invoke('show-save-dialog'),
   readDirectory: (dirPath) => ipcRenderer.invoke('read-directory', dirPath),
+  searchInFiles: (searchData) => ipcRenderer.invoke('search-in-files', searchData),
   
   // Export operations
   exportPDF: (data) => ipcRenderer.invoke('export-pdf', data),

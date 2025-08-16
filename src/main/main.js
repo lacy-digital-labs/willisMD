@@ -1342,6 +1342,100 @@ ipcMain.handle('read-directory', async (event, dirPath) => {
   }
 });
 
+// Search in files functionality
+ipcMain.handle('search-in-files', async (event, { searchPath, searchTerm, options = {} }) => {
+  const results = [];
+  const { caseSensitive = false, maxResults = 100 } = options;
+  
+  async function searchInFile(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf-8');
+      const lines = content.split('\n');
+      const matches = [];
+      
+      const searchRegex = caseSensitive 
+        ? new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
+        : new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      
+      lines.forEach((line, index) => {
+        if (searchRegex.test(line)) {
+          matches.push({
+            lineNumber: index + 1,
+            lineContent: line.trim(),
+            preview: line.length > 100 ? line.substring(0, 100) + '...' : line
+          });
+        }
+      });
+      
+      if (matches.length > 0) {
+        return {
+          filePath,
+          fileName: path.basename(filePath),
+          relativePath: path.relative(searchPath, filePath),
+          matches: matches.slice(0, 10), // Limit matches per file
+          totalMatches: matches.length
+        };
+      }
+    } catch (error) {
+      // Silently skip files that can't be read
+      console.log('Could not read file:', filePath, error.message);
+    }
+    return null;
+  }
+  
+  async function searchDirectory(dirPath) {
+    if (results.length >= maxResults) return;
+    
+    try {
+      const items = await fs.readdir(dirPath, { withFileTypes: true });
+      
+      for (const item of items) {
+        if (results.length >= maxResults) break;
+        
+        // Skip hidden files and common non-text directories
+        if (item.name.startsWith('.') || 
+            item.name === 'node_modules' || 
+            item.name === 'dist' || 
+            item.name === 'build') {
+          continue;
+        }
+        
+        const fullPath = path.join(dirPath, item.name);
+        
+        if (item.isDirectory()) {
+          await searchDirectory(fullPath);
+        } else if (item.isFile()) {
+          // Only search in text files
+          const ext = path.extname(item.name).toLowerCase();
+          const textExtensions = ['.md', '.markdown', '.txt', '.json', '.js', '.html', '.css', '.yml', '.yaml', '.xml'];
+          
+          if (textExtensions.includes(ext)) {
+            const result = await searchInFile(fullPath);
+            if (result) {
+              results.push(result);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error searching directory:', dirPath, error);
+    }
+  }
+  
+  try {
+    await searchDirectory(searchPath);
+    return { 
+      success: true, 
+      results, 
+      totalFiles: results.length,
+      searchTerm,
+      searchPath
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 // Export handlers
 ipcMain.handle('export-pdf', async (event, { markdown, title, styleCSS }) => {
   try {

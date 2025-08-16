@@ -50,6 +50,7 @@ The project is actively developed with a fully functional Electron + React appli
 20. ✅ Multiple cursor support
 21. ✅ Support for Wiki style links
 22. ✅ Word wrap in editor for easier editing of long lines
+23. ✅ Search functionality in file explorer for knowledge management
 
 ## Features to Implement
 
@@ -170,7 +171,18 @@ The CodeMirror editor is enabled by default for all users, providing a consisten
 4. No plugin system for extensibility
 5. Some CodeMirror features could be expanded (vim bindings, more extensions)
 
-## Recent Updates (v0.8.7)
+## Recent Updates (v0.9.1)
+
+### Search Functionality for Knowledge Management
+- **Added comprehensive search feature** - Search for text across all files in the current folder and subfolders
+- **Smart file filtering** - Automatically searches only text files (.md, .txt, .json, .js, .html, .css, .yml, .yaml, .xml)
+- **Intuitive search UI** - Search button in file explorer toolbar with expandable search bar
+- **Detailed search results** - Shows matching files with line numbers, preview text, and click-to-open functionality
+- **Theme-aware interface** - Search UI integrates seamlessly with the app's theme system
+- **Cross-platform compatibility** - Works on Windows, macOS, and Linux
+- **Knowledge management optimized** - Perfect for searching through personal knowledge bases and note collections
+
+## Previous Updates (v0.8.7)
 
 ### Theme Export Fix
 - **Fixed theme selection for exports** - PDF, HTML, EPUB, DOCX exports now correctly use the selected preview theme

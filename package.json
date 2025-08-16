@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
