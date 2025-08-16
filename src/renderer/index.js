@@ -3518,6 +3518,9 @@ function App() {
                   const updatedPrefs = { ...preferences, previewStyle: newStyle };
                   setPreferences(updatedPrefs);
                   
+                  // Apply current theme to ensure light/dark mode is respected
+                  applyTheme(preferences.theme, preferences.mode);
+                  
                   // Save to persistent storage
                   try {
                     await window.electronAPI.preferencesSave(updatedPrefs);
