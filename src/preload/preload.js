@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportEPUB: (data) => ipcRenderer.invoke('export-epub', data),
   exportDOCX: (data) => ipcRenderer.invoke('export-docx', data),
   
+  // Print operations
+  printPreview: (data) => ipcRenderer.invoke('print-preview', data),
+  
   // Save confirmation operations
   showSaveConfirmation: (data) => ipcRenderer.invoke('show-save-confirmation', data),
   showMessageBox: (options) => ipcRenderer.invoke('show-message-box', options),
@@ -60,6 +63,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onExportHTML: (callback) => ipcRenderer.on('menu-export-html', callback),
   onExportEPUB: (callback) => ipcRenderer.on('menu-export-epub', callback),
   onExportDOCX: (callback) => ipcRenderer.on('menu-export-docx', callback),
+  
+  // Print menu event
+  onPrint: (callback) => ipcRenderer.on('menu-print', callback),
   
   // Preferences menu events
   onShowPreferences: (callback) => ipcRenderer.on('menu-show-preferences', callback),

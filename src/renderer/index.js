@@ -5,12 +5,13 @@ import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
 import AboutDialog from './components/AboutDialog';
 import CodeMirrorEditor from './components/CodeMirrorEditor';
+import { previewStyles, getStyleCSS, getStyleNames } from '../shared/previewStyles';
 import './styles.css';
 import './themes.css';
 
 
 // Preview Component with scroll sync support and debounced rendering
-function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWikiLinkClick }) {
+function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWikiLinkClick, previewStyle = 'standard' }) {
   const previewRef = useRef(null);
   const [debouncedContent, setDebouncedContent] = useState(content);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -140,6 +141,16 @@ function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWiki
     }
   };
 
+  // Wrap the content with style tag
+  const styledHtml = `
+    <style>
+      ${getStyleCSS(previewStyle)}
+    </style>
+    <div class="preview-content">
+      ${renderedHtml}
+    </div>
+  `;
+
   return React.createElement('div', {
     ref: previewRef,
     className: 'preview',
@@ -148,14 +159,11 @@ function Preview({ content, onScroll, scrollToPercentage, currentFileDir, onWiki
       height: '100%',
       overflow: 'auto',
       backgroundColor: 'var(--preview-bg)',
-      color: 'var(--preview-text)',
-      fontFamily: 'Georgia, serif',
-      lineHeight: '1.6',
       boxSizing: 'border-box',
       minWidth: 0 // Prevent flex shrinking issues
     },
     onScroll: handleScrollEvent,
-    dangerouslySetInnerHTML: { __html: renderedHtml }
+    dangerouslySetInnerHTML: { __html: styledHtml }
   });
 }
 
@@ -1478,6 +1486,50 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
         )
       ),
       
+      // Preview Style Setting
+      React.createElement('div', {
+        style: { marginBottom: '20px' }
+      },
+        React.createElement('label', {
+          style: { 
+            display: 'block', 
+            marginBottom: '8px', 
+            fontWeight: 'bold',
+            color: 'var(--text-primary)'
+          }
+        }, 'Preview Style'),
+        React.createElement('select', {
+          value: localPrefs.previewStyle || 'standard',
+          onChange: (e) => setLocalPrefs(prev => ({
+            ...prev,
+            previewStyle: e.target.value
+          })),
+          style: {
+            width: '100%',
+            padding: '8px 12px',
+            border: '1px solid var(--border-medium)',
+            borderRadius: '4px',
+            backgroundColor: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
+            fontSize: '14px'
+          }
+        },
+          getStyleNames().map(style =>
+            React.createElement('option', {
+              key: style.value,
+              value: style.value
+            }, style.label)
+          )
+        ),
+        React.createElement('div', {
+          style: {
+            marginTop: '8px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)'
+          }
+        }, 'Choose how your markdown preview and printed documents will appear')
+      ),
+      
       
       // Action Buttons
       React.createElement('div', {
@@ -2013,8 +2065,39 @@ function App() {
       togglePreview();
     };
     
+    // Helper function to get current theme selection
+    const getCurrentThemeStyle = async () => {
+      console.log('getCurrentThemeStyle: Starting theme detection...');
+      
+      // Method 1: Check DOM dropdown (most current UI state)
+      const dropdownElement = document.querySelector('select[title="Select preview style"]');
+      const domValue = dropdownElement ? dropdownElement.value : null;
+      console.log('getCurrentThemeStyle: DOM dropdown value:', domValue);
+      
+      // Method 2: Check React state 
+      const stateValue = preferences.previewStyle;
+      console.log('getCurrentThemeStyle: React state value:', stateValue);
+      
+      // Method 3: Try to get from electron preferences directly
+      let electronPrefsValue = null;
+      try {
+        const electronPrefs = await window.electronAPI.preferencesLoad();
+        electronPrefsValue = electronPrefs.previewStyle;
+        console.log('getCurrentThemeStyle: Electron prefs value:', electronPrefsValue);
+      } catch (error) {
+        console.log('getCurrentThemeStyle: Could not load electron prefs:', error);
+      }
+      
+      // Prioritize: DOM > Electron prefs > React state > default
+      const finalValue = domValue || electronPrefsValue || stateValue || 'standard';
+      console.log('getCurrentThemeStyle: Final selected value:', finalValue);
+      
+      return finalValue;
+    };
+
     // Export handlers
     const handleExportPDF = async () => {
+      console.log('=== RENDERER: handleExportPDF CALLED ===');
       console.log('App: Export PDF requested');
       const current = currentTabRef.current;
       if (!current.content.trim()) {
@@ -2024,9 +2107,23 @@ function App() {
       
       setStatus('Exporting to PDF...');
       try {
+        // Get the current theme selection - use live dropdown value
+        const selectedStyle = await getCurrentThemeStyle();
+        const cssContent = getStyleCSS(selectedStyle);
+        console.log('PDF Export: Using theme style:', selectedStyle);
+        console.log('PDF Export: CSS content preview (first 200 chars):', cssContent.substring(0, 200));
+        console.log('PDF Export: CSS contains monospace fonts?', cssContent.includes('monospace'));
+        console.log('PDF Export: CSS contains blue color?', cssContent.includes('#0066cc'));
+        
+        // Debug: Test getStyleCSS directly with different values
+        console.log('DEBUG: getStyleCSS("standard") preview:', getStyleCSS('standard').substring(0, 100));
+        console.log('DEBUG: getStyleCSS("technical") preview:', getStyleCSS('technical').substring(0, 100));
+        console.log('DEBUG: Technical theme contains monospace?', getStyleCSS('technical').includes('monospace'));
+        
         const result = await window.electronAPI.exportPDF({
           markdown: current.content,
-          title: current.name || 'document'
+          title: current.name || 'document',
+          styleCSS: cssContent
         });
         
         if (result.success) {
@@ -2051,9 +2148,13 @@ function App() {
       
       setStatus('Exporting to HTML...');
       try {
+        const selectedStyle = await getCurrentThemeStyle();
+        console.log('HTML Export: Using theme style:', selectedStyle);
+        
         const result = await window.electronAPI.exportHTML({
           markdown: current.content,
-          title: current.name || 'document'
+          title: current.name || 'document',
+          styleCSS: getStyleCSS(selectedStyle)
         });
         
         if (result.success) {
@@ -2078,10 +2179,14 @@ function App() {
       
       setStatus('Exporting to EPUB...');
       try {
+        const selectedStyle = await getCurrentThemeStyle();
+        console.log('EPUB Export: Using theme style:', selectedStyle);
+        
         const result = await window.electronAPI.exportEPUB({
           markdown: current.content,
           title: current.name || 'document',
-          author: 'willisMD User'
+          author: 'willisMD User',
+          styleCSS: getStyleCSS(selectedStyle)
         });
         
         if (result.success) {
@@ -2106,9 +2211,13 @@ function App() {
       
       setStatus('Exporting to DOCX...');
       try {
+        const selectedStyle = await getCurrentThemeStyle();
+        console.log('DOCX Export: Using theme style:', selectedStyle);
+        
         const result = await window.electronAPI.exportDOCX({
           markdown: current.content,
-          title: current.name || 'document'
+          title: current.name || 'document',
+          styleCSS: getStyleCSS(selectedStyle)
         });
         
         if (result.success) {
@@ -2120,6 +2229,53 @@ function App() {
         }
       } catch (error) {
         setStatus(`✗ Export error: ${error.message}`);
+      }
+    };
+    
+    // Print handler
+    const handlePrint = async () => {
+      console.log('App: Print requested');
+      const current = currentTabRef.current;
+      if (!current.content.trim()) {
+        setStatus('✗ No content to print');
+        return;
+      }
+      
+      setStatus('Preparing to print...');
+      try {
+        // Convert markdown to HTML for printing (same process as preview)
+        const processWikiLinks = (text) => {
+          if (!text) return text;
+          
+          // Regex to match [[filename]] patterns
+          const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+          
+          return text.replace(wikiLinkRegex, (match, filename) => {
+            // Clean the filename and create a clickable link
+            const cleanFilename = filename.trim();
+            return `<a href="#" class="wiki-link" data-filename="${cleanFilename}">${cleanFilename}</a>`;
+          });
+        };
+        
+        const processedContent = processWikiLinks(current.content);
+        const html = marked(processedContent);
+        
+        const selectedStyle = await getCurrentThemeStyle();
+        console.log('Print: Using theme style:', selectedStyle);
+        
+        const result = await window.electronAPI.printPreview({
+          html: html,
+          title: current.name || 'document',
+          styleCSS: getStyleCSS(selectedStyle)
+        });
+        
+        if (result.success) {
+          setStatus('✓ Print dialog opened');
+        } else {
+          setStatus(`✗ Print failed: ${result.error}`);
+        }
+      } catch (error) {
+        setStatus(`✗ Print error: ${error.message}`);
       }
     };
     
@@ -2143,17 +2299,44 @@ function App() {
       
       try {
         const currentTabs = tabsRef.current;
-        const unsavedTabs = currentTabs.filter(tab => tab.isDirty && tab.path);
+        const unsavedTabs = currentTabs.filter(tab => tab.isDirty);
         
-        console.log(`App: Found ${unsavedTabs.length} unsaved tabs with paths`);
+        console.log(`App: Found ${unsavedTabs.length} unsaved tabs`);
         
+        // First check if any tabs need save dialog (no path)
+        const tabsWithoutPath = unsavedTabs.filter(tab => !tab.path);
+        if (tabsWithoutPath.length > 0) {
+          // We have unsaved new files - for now, just notify and cancel quit
+          console.log('Found tabs without paths, canceling quit');
+          const message = tabsWithoutPath.length === 1 
+            ? `The file "${tabsWithoutPath[0].name}" has not been saved. Please save it before quitting.`
+            : `${tabsWithoutPath.length} files have not been saved. Please save them before quitting.`;
+          
+          await window.electronAPI.showMessageBox({
+            type: 'warning',
+            title: 'Unsaved Files',
+            message: message,
+            buttons: ['OK']
+          });
+          
+          // Don't send save-all-complete to cancel the quit
+          return;
+        }
+        
+        // Save all tabs that have paths
         for (const tab of unsavedTabs) {
-          console.log(`Saving tab: ${tab.name}`);
-          const result = await window.electronAPI.writeFile(tab.path, tab.content);
-          if (!result.success) {
-            console.error(`Failed to save ${tab.name}:`, result.error);
-          } else {
-            console.log(`Successfully saved: ${tab.name}`);
+          if (tab.path) {
+            console.log(`Saving tab: ${tab.name} to ${tab.path}`);
+            try {
+              const result = await window.electronAPI.writeFile(tab.path, tab.content);
+              if (!result.success) {
+                console.error(`Failed to save ${tab.name}:`, result.error);
+              } else {
+                console.log(`Successfully saved: ${tab.name}`);
+              }
+            } catch (saveError) {
+              console.error(`Error saving ${tab.name}:`, saveError);
+            }
           }
         }
         
@@ -2176,10 +2359,15 @@ function App() {
       window.electronAPI.onOpenFolder(handleOpenFolder);
       window.electronAPI.onToggleExplorer(handleMenuToggleExplorer);
       window.electronAPI.onTogglePreview(handleMenuTogglePreview);
-      window.electronAPI.onExportPDF(handleExportPDF);
+      console.log('=== SETTING UP onExportPDF LISTENER ===');
+      window.electronAPI.onExportPDF((event) => {
+        console.log('=== onExportPDF EVENT RECEIVED ===', event);
+        handleExportPDF();
+      });
       window.electronAPI.onExportHTML(handleExportHTML);
       window.electronAPI.onExportEPUB(handleExportEPUB);
       window.electronAPI.onExportDOCX(handleExportDOCX);
+      window.electronAPI.onPrint(handlePrint);
       window.electronAPI.onShowPreferences(handleShowPreferences);
       console.log('App: Registering onShowAbout listener');
       window.electronAPI.onShowAbout(handleShowAbout);
@@ -2207,6 +2395,7 @@ function App() {
       window.electronAPI.removeAllListeners('menu-show-about');
       window.electronAPI.removeAllListeners('menu-find');
       window.electronAPI.removeAllListeners('menu-replace');
+      window.electronAPI.removeAllListeners('menu-print');
     };
   }, []);
   
@@ -2983,25 +3172,66 @@ function App() {
             }
           }, 
             React.createElement('span', null, 'Preview'),
-            React.createElement('button', {
+            React.createElement('div', {
               style: {
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: '#666',
-                padding: '2px 4px'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }
+            },
+              // Style selector dropdown
+              React.createElement('select', {
+                value: preferences.previewStyle || 'standard',
+                onChange: async (e) => {
+                  const newStyle = e.target.value;
+                  const updatedPrefs = { ...preferences, previewStyle: newStyle };
+                  setPreferences(updatedPrefs);
+                  
+                  // Save to persistent storage
+                  try {
+                    await window.electronAPI.preferencesSave(updatedPrefs);
+                  } catch (error) {
+                    console.error('Failed to save preferences:', error);
+                  }
+                },
+                style: {
+                  fontSize: '11px',
+                  padding: '2px 4px',
+                  border: '1px solid #ccc',
+                  borderRadius: '3px',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                },
+                title: 'Select preview style'
               },
-              onClick: togglePreview,
-              title: 'Hide Preview'
-            }, '✕')
+                getStyleNames().map(style =>
+                  React.createElement('option', {
+                    key: style.value,
+                    value: style.value
+                  }, style.label)
+                )
+              ),
+              React.createElement('button', {
+                style: {
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  color: '#666',
+                  padding: '2px 4px'
+                },
+                onClick: togglePreview,
+                title: 'Hide Preview'
+              }, '✕')
+            )
           ),
           React.createElement(Preview, {
             content: currentTab.content,
             onScroll: handleScroll,
             scrollToPercentage: lastScrollSource === 'editor' ? previewScrollPercentage : null,
             currentFileDir: currentTab.path ? currentTab.path.substring(0, currentTab.path.lastIndexOf('/')) : null,
-            onWikiLinkClick: handleWikiLinkClick
+            onWikiLinkClick: handleWikiLinkClick,
+            previewStyle: preferences.previewStyle || 'standard'
           })
         )
       )

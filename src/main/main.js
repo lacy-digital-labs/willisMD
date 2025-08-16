@@ -7,6 +7,152 @@ const preferencesManager = require('./preferences');
 let mainWindow;
 let fileToOpen = null; // Store file to open if app isn't ready yet
 
+// Embedded theme styles for export functions to avoid module loading issues in production
+function getThemeCSS(themeName) {
+  const themes = {
+    standard: `
+      .preview-content {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+      }
+      .preview-content h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+      .preview-content h2 { font-size: 1.5em; }
+      .preview-content h3 { font-size: 1.25em; }
+      .preview-content pre {
+        background-color: #f6f8fa;
+        padding: 16px;
+        overflow: auto;
+        border-radius: 6px;
+      }
+      .preview-content code {
+        background-color: #f6f8fa;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 85%;
+      }
+      .preview-content blockquote {
+        border-left: 4px solid #dfe2e5;
+        padding-left: 16px;
+        margin-left: 0;
+        color: #6a737d;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 16px 0;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #dfe2e5;
+        padding: 6px 13px;
+      }
+      .preview-content table tr:nth-child(2n) {
+        background-color: #f6f8fa;
+      }
+      .preview-content img { max-width: 100%; height: auto; }
+      .preview-content a { color: #0366d6; text-decoration: none; }
+      .preview-content a:hover { text-decoration: underline; }
+    `,
+    modern: `
+      .preview-content {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.8;
+        color: #1a1a1a;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #fafafa;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        margin-top: 32px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .preview-content h1 { 
+        font-size: 3em; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 32px;
+      }
+      .preview-content h2 { font-size: 2.2em; color: #2d3748; }
+      .preview-content h3 { font-size: 1.8em; color: #4a5568; }
+      .preview-content pre {
+        background: #1a202c;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 10px;
+        overflow-x: auto;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      .preview-content code {
+        background: #edf2f7;
+        color: #805ad5;
+        padding: 0.25em 0.5em;
+        border-radius: 4px;
+        font-family: 'Fira Code', monospace;
+      }
+      .preview-content blockquote {
+        border-left: 5px solid #667eea;
+        padding-left: 20px;
+        margin: 20px 0;
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 5px;
+        font-style: italic;
+      }
+      .preview-content table {
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 20px 0;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      .preview-content table th, .preview-content table td {
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 12px 16px;
+      }
+      .preview-content table th {
+        background: #667eea;
+        color: white;
+        font-weight: 600;
+      }
+      .preview-content table tr:nth-child(2n) {
+        background-color: #f7fafc;
+      }
+      .preview-content img { 
+        max-width: 100%; 
+        height: auto; 
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      .preview-content a { 
+        color: #667eea; 
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        transition: border-color 0.2s;
+      }
+      .preview-content a:hover { 
+        border-bottom-color: #667eea;
+      }
+    `,
+    // Add other themes as needed - for now just standard and modern for testing
+  };
+  
+  // Return the requested theme or fall back to standard
+  return themes[themeName] || themes.standard;
+}
+
 function createWindow() {
   console.log('Creating Electron window...');
   
@@ -25,6 +171,15 @@ function createWindow() {
   
   // Store window reference
   mainWindow = win;
+  
+  // Handle window close event
+  win.on('close', async (event) => {
+    if (!forceQuit && !isQuitting) {
+      event.preventDefault();
+      // Trigger the app quit flow which will check for unsaved changes
+      app.quit();
+    }
+  });
   
   // Handle file opening after window loads
   win.webContents.once('did-finish-load', () => {
@@ -371,6 +526,17 @@ async function createMenu() {
               }
             }
           ]
+        },
+        { type: 'separator' },
+        {
+          label: 'Print...',
+          accelerator: 'CmdOrCtrl+P',
+          click: () => {
+            console.log('Print menu clicked');
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('menu-print');
+            }
+          }
         }
       ]
     },
@@ -601,17 +767,39 @@ ipcMain.handle('read-directory', async (event, dirPath) => {
 });
 
 // Export handlers
-ipcMain.handle('export-pdf', async (event, { markdown, title }) => {
+ipcMain.handle('export-pdf', async (event, { markdown, title, styleCSS }) => {
   try {
+    console.log('=== MAIN PROCESS: PDF export IPC handler called ===');
+    console.log('Main process: PDF export requested');
+    console.log('Main process: Event sender:', event.sender.id);
+    console.log('Main process: Received data keys:', Object.keys({ markdown, title, styleCSS }));
+    console.log('Main process: Title:', title);
+    console.log('Main process: Markdown length:', markdown ? markdown.length : 'NO MARKDOWN');
+    console.log('Main process: Received styleCSS preview (first 200 chars):', styleCSS ? styleCSS.substring(0, 200) : 'NO CSS PROVIDED');
+    
+    // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
+    console.log('Main process: Loading current preferences to get actual theme...');
+    const currentPrefs = await preferencesManager.load();
+    const currentTheme = currentPrefs.previewStyle || 'standard';
+    console.log('Main process: Current theme from preferences:', currentTheme);
+    
+    // Generate CSS for the current theme using embedded function
+    const correctCSS = getThemeCSS(currentTheme);
+    console.log('Main process: Generated CSS preview (first 200 chars):', correctCSS.substring(0, 200));
+    console.log('Main process: Using corrected theme CSS instead of renderer CSS');
+    
+    // Remove .md extension if present
+    const cleanTitle = (title || 'document').replace(/\.md$/, '');
     const result = await dialog.showSaveDialog(mainWindow, {
       filters: [
         { name: 'PDF Files', extensions: ['pdf'] }
       ],
-      defaultPath: `${title || 'document'}.pdf`
+      defaultPath: `${cleanTitle}.pdf`
     });
     
     if (!result.canceled) {
-      return await exportToPDF(markdown, result.filePath, { title });
+      // Use the corrected CSS instead of the one from renderer
+      return await exportToPDF(markdown, result.filePath, { title, styleCSS: correctCSS });
     }
     return { success: false, canceled: true };
   } catch (error) {
@@ -619,17 +807,26 @@ ipcMain.handle('export-pdf', async (event, { markdown, title }) => {
   }
 });
 
-ipcMain.handle('export-html', async (event, { markdown, title }) => {
+ipcMain.handle('export-html', async (event, { markdown, title, styleCSS }) => {
   try {
+    // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
+    const currentPrefs = await preferencesManager.load();
+    const currentTheme = currentPrefs.previewStyle || 'standard';
+    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
+    const correctCSS = getStyleCSS(currentTheme);
+    console.log('Main process HTML export: Using theme', currentTheme);
+    
+    // Remove .md extension if present
+    const cleanTitle = (title || 'document').replace(/\.md$/, '');
     const result = await dialog.showSaveDialog(mainWindow, {
       filters: [
         { name: 'HTML Files', extensions: ['html'] }
       ],
-      defaultPath: `${title || 'document'}.html`
+      defaultPath: `${cleanTitle}.html`
     });
     
     if (!result.canceled) {
-      return await exportToHTML(markdown, result.filePath, { title });
+      return await exportToHTML(markdown, result.filePath, { title, styleCSS: correctCSS });
     }
     return { success: false, canceled: true };
   } catch (error) {
@@ -637,17 +834,26 @@ ipcMain.handle('export-html', async (event, { markdown, title }) => {
   }
 });
 
-ipcMain.handle('export-epub', async (event, { markdown, title, author }) => {
+ipcMain.handle('export-epub', async (event, { markdown, title, author, styleCSS }) => {
   try {
+    // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
+    const currentPrefs = await preferencesManager.load();
+    const currentTheme = currentPrefs.previewStyle || 'standard';
+    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
+    const correctCSS = getStyleCSS(currentTheme);
+    console.log('Main process EPUB export: Using theme', currentTheme);
+    
+    // Remove .md extension if present
+    const cleanTitle = (title || 'document').replace(/\.md$/, '');
     const result = await dialog.showSaveDialog(mainWindow, {
       filters: [
         { name: 'EPUB Files', extensions: ['epub'] }
       ],
-      defaultPath: `${title || 'document'}.epub`
+      defaultPath: `${cleanTitle}.epub`
     });
     
     if (!result.canceled) {
-      return await exportToEPUB(markdown, result.filePath, { title, author });
+      return await exportToEPUB(markdown, result.filePath, { title, author, styleCSS: correctCSS });
     }
     return { success: false, canceled: true };
   } catch (error) {
@@ -655,20 +861,95 @@ ipcMain.handle('export-epub', async (event, { markdown, title, author }) => {
   }
 });
 
-ipcMain.handle('export-docx', async (event, { markdown, title }) => {
+ipcMain.handle('export-docx', async (event, { markdown, title, styleCSS }) => {
   try {
+    // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
+    const currentPrefs = await preferencesManager.load();
+    const currentTheme = currentPrefs.previewStyle || 'standard';
+    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
+    const correctCSS = getStyleCSS(currentTheme);
+    console.log('Main process DOCX export: Using theme', currentTheme);
+    
+    // Remove .md extension if present
+    const cleanTitle = (title || 'document').replace(/\.md$/, '');
     const result = await dialog.showSaveDialog(mainWindow, {
       filters: [
         { name: 'Word Documents', extensions: ['docx'] }
       ],
-      defaultPath: `${title || 'document'}.docx`
+      defaultPath: `${cleanTitle}.docx`
     });
     
     if (!result.canceled) {
-      return await exportToDOCX(markdown, result.filePath, { title });
+      return await exportToDOCX(markdown, result.filePath, { title, styleCSS: correctCSS });
     }
     return { success: false, canceled: true };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Print handler
+ipcMain.handle('print-preview', async (event, { html, title, styleCSS }) => {
+  try {
+    // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
+    const currentPrefs = await preferencesManager.load();
+    const currentTheme = currentPrefs.previewStyle || 'standard';
+    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
+    const correctCSS = getStyleCSS(currentTheme);
+    console.log('Main process Print: Using theme', currentTheme);
+    
+    // Create a hidden window for printing
+    const printWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    });
+
+    // Load the HTML content with the provided style
+    const printContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${title || 'Document'}</title>
+  <style>
+    @media print {
+      body {
+        margin: 0;
+      }
+      @page {
+        margin: 0.5in;
+      }
+    }
+    ${correctCSS || ''}
+  </style>
+</head>
+<body>
+  <div class="preview-content">
+    ${html}
+  </div>
+</body>
+</html>`;
+
+    await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(printContent)}`);
+
+    // Print the window
+    printWindow.webContents.print({
+      silent: false,
+      printBackground: true,
+      deviceName: ''
+    }, (success, failureReason) => {
+      printWindow.close();
+      if (!success) {
+        console.error('Print failed:', failureReason);
+      }
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Print error:', error);
     return { success: false, error: error.message };
   }
 });
@@ -935,9 +1216,14 @@ app.whenReady().then(async () => {
 
 // Handle app quit with save confirmation
 let isQuitting = false;
+let forceQuit = false;
 
 app.on('before-quit', async (event) => {
   console.log('App before-quit event');
+  
+  if (forceQuit) {
+    return; // Force quit without checks
+  }
   
   if (isQuitting) {
     return; // Already handling quit
@@ -983,16 +1269,18 @@ app.on('before-quit', async (event) => {
         // Save all
         mainWindow.webContents.send('save-all-before-quit');
         
-        // Wait for save completion
+        // Wait for save completion with proper timeout
         const saveTimeout = setTimeout(() => {
           console.log('Save timeout, forcing quit');
-          app.exit();
-        }, 5000);
+          forceQuit = true;
+          app.quit();
+        }, 10000); // Give more time for saves
         
         ipcMain.once('save-all-complete', () => {
           clearTimeout(saveTimeout);
           console.log('Save complete, quitting app');
-          app.exit();
+          forceQuit = true;
+          app.quit();
         });
         
         return;
@@ -1001,11 +1289,25 @@ app.on('before-quit', async (event) => {
     
     // No unsaved changes or user chose don't save
     console.log('No unsaved changes, quitting app');
-    app.exit();
+    forceQuit = true;
+    app.quit();
     
   } catch (error) {
     console.error('Error checking unsaved changes:', error);
-    app.exit();
+    // Show error dialog and allow quit
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'Error',
+      message: 'An error occurred while checking for unsaved changes. Your work may not be saved.',
+      buttons: ['Quit Anyway', 'Cancel']
+    });
+    
+    if (result.response === 0) {
+      forceQuit = true;
+      app.quit();
+    } else {
+      isQuitting = false;
+    }
   }
 });
 

@@ -32,7 +32,7 @@ The project is actively developed with a fully functional Electron + React appli
 2. ✅ Basic file operations (open, save, save as)
 3. ✅ Tab support for multiple files
 4. ✅ Toolbar for markdown formatting
-5. ✅ Export functionality (HTML, PDF, DOCX)
+5. ✅ Export functionality (HTML, PDF, EPUB, DOCX) with theme support
 6. ✅ Template support for new documents
 7. ✅ Syntax highlighting in editor
 8. ✅ Undo/redo functionality
@@ -61,10 +61,9 @@ The project is actively developed with a fully functional Electron + React appli
    - Math equations (LaTeX)
    - Mermaid diagrams
 3. Keyboard shortcuts for all menu actions
-4. Live markdown preview in editor (inline)
 5. Auto-completion for markdown syntax
 6. Markdown linting
-7. Custom themes matching app themes
+
 
 ## Development Commands
 
@@ -81,7 +80,7 @@ The project is actively developed with a fully functional Electron + React appli
 ```
 src/
 ├── main/
-│   ├── main.js          # Main Electron process
+│   ├── main.js          # Main Electron process (includes embedded theme CSS)
 │   ├── exportUtils.js   # Export functionality (PDF, DOCX, etc.)
 │   └── preferences.js   # Preferences window handler
 ├── preload/
@@ -96,6 +95,8 @@ src/
 │   ├── SyntaxHighlighter.js # Syntax highlighting utilities
 │   ├── styles.css       # Main application styles
 │   └── themes.css       # Theme definitions
+├── shared/
+│   └── previewStyles.js # Shared theme styles for preview and export
 └── templates/           # Document templates
 ```
 
@@ -111,9 +112,18 @@ src/
    - **CodeMirror 6**: Professional text editor with full markdown syntax highlighting, line numbers, code folding, and advanced features
    - **Unified Experience**: All users get the same powerful editing experience
 
-5. **Export Functionality**: Supports HTML, PDF (via puppeteer), and DOCX (via html-to-docx) exports.
+5. **Export Functionality**: 
+   - Supports HTML, PDF (via puppeteer), EPUB, and DOCX exports
+   - Theme-aware exports: All export formats use the currently selected preview theme
+   - Main process override: Exports read theme directly from saved preferences to ensure consistency
+   - Embedded theme CSS in main process for production compatibility
 
-6. **Theme System**: Comprehensive theming with CSS custom properties supporting 10 different themes.
+6. **Theme System**: 
+   - Comprehensive theming with CSS custom properties supporting 10 different themes
+   - Themes available: Standard, Modern, Manuscript, Business, Informal, Academic, Technical, Minimalist, Classic, Report
+   - Live preview updates when switching themes
+   - Theme selection persists across sessions
+   - All exports respect selected theme
 
 ## Key Dependencies
 
@@ -160,13 +170,27 @@ The CodeMirror editor is enabled by default for all users, providing a consisten
 4. No plugin system for extensibility
 5. Some CodeMirror features could be expanded (vim bindings, more extensions)
 
-## Recent Updates (v0.8.3)
+## Recent Updates (v0.8.7)
+
+### Theme Export Fix
+- **Fixed theme selection for exports** - PDF, HTML, EPUB, DOCX exports now correctly use the selected preview theme
+- **Implemented main process theme override** - Exports read theme directly from saved preferences to avoid React state synchronization issues
+- **Embedded theme CSS in main process** - Resolved module loading errors in production builds
+- **Comprehensive theme support** - All export formats now respect the user's selected preview style
+
+### Technical Improvements
+- **Webpack configuration fixes** - Resolved `require is not defined` errors in development
+- **CSP security improvements** - Removed `unsafe-eval` from Content Security Policy
+- **Module architecture** - Created shared directory for common modules between main and renderer processes
+- **Production build compatibility** - Fixed .asar packaging issues with dynamic module loading
+
+## Previous Updates (v0.8.3)
 
 - **Enhanced editor experience with word wrap** - Added word wrap functionality to CodeMirror editor for easier editing of long lines
 - **Improved editing usability** - Long paragraphs and sentences now wrap naturally in the editor without horizontal scrolling
 - **Maintained all existing functionality** - Word wrap addition preserves all existing features and performance
 
-## Previous Updates (v0.8.2)
+## Earlier Updates (v0.8.2)
 
 - **Fixed External Link Navigation Issue** - Resolved issue with external links not opening properly in default browser
 

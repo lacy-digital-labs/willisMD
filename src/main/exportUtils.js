@@ -7,6 +7,42 @@ const archiver = require('archiver');
 const { v4: uuidv4 } = require('uuid');
 const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel, AlignmentType, WidthType, BorderStyle } = require('docx');
 
+// Optimize CSS for better PDF rendering
+function optimizeCSSForPDF(css) {
+  return css
+    // Replace webkit-specific gradient text with solid color
+    .replace(/background:\s*linear-gradient\([^}]+\);\s*-webkit-background-clip:\s*text;\s*-webkit-text-fill-color:\s*transparent;/g, 
+             'color: #667eea;')
+    
+    // Replace complex gradients with solid colors  
+    .replace(/background:\s*linear-gradient\([^;]+\);/g, 'background: #f0f4ff;')
+    
+    // Simplify box-shadows for PDF
+    .replace(/box-shadow:[^;]+;/g, 'border: 1px solid #e0e0e0;')
+    
+    // Convert rgba colors to rgb for better PDF support
+    .replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/g, 'rgb($1,$2,$3)')
+    
+    // Remove webkit-specific properties
+    .replace(/-webkit-[^:]+:[^;]+;/g, '')
+    
+    // Remove transform properties that can cause issues
+    .replace(/transform:[^;]+;/g, '')
+    
+    // Ensure print-safe fonts
+    .replace(/font-family:\s*'Inter'[^;]+;/g, "font-family: 'Helvetica Neue', Arial, sans-serif;")
+    .replace(/font-family:\s*'Comic Sans MS'[^;]+;/g, "font-family: 'Arial', sans-serif;")
+    
+    // Remove complex background patterns
+    .replace(/background-image:[^;]+;/g, '')
+    
+    // Simplify border-radius for better PDF rendering
+    .replace(/border-radius:\s*([0-9]+)px/g, (match, p1) => {
+      const radius = parseInt(p1);
+      return radius > 10 ? 'border-radius: 10px' : match;
+    });
+}
+
 // Export to PDF using Puppeteer
 async function exportToPDF(markdown, outputPath, options = {}) {
   try {
@@ -14,14 +50,10 @@ async function exportToPDF(markdown, outputPath, options = {}) {
     
     // Convert markdown to HTML
     const html = marked(markdown);
-    const fullHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Exported Document</title>
-    <style>
-        body {
+    
+    // Use provided styleCSS but optimize for PDF rendering
+    let styleCSS = options.styleCSS || `
+        .preview-content {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             max-width: 800px;
@@ -29,52 +61,72 @@ async function exportToPDF(markdown, outputPath, options = {}) {
             padding: 2rem;
             color: #333;
         }
-        h1, h2, h3, h4, h5, h6 { 
+        .preview-content h1, .preview-content h2, .preview-content h3, 
+        .preview-content h4, .preview-content h5, .preview-content h6 { 
             margin-top: 2rem; 
             margin-bottom: 1rem; 
             color: #222;
         }
-        h1 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 0.3rem; }
-        table { 
+        .preview-content h1 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        .preview-content h2 { border-bottom: 1px solid #eee; padding-bottom: 0.3rem; }
+        .preview-content table { 
             border-collapse: collapse; 
             width: 100%; 
             margin: 1rem 0;
         }
-        th, td { 
+        .preview-content th, .preview-content td { 
             border: 1px solid #ddd; 
             padding: 0.5rem; 
             text-align: left; 
         }
-        th { background-color: #f5f5f5; font-weight: bold; }
-        code { 
+        .preview-content th { background-color: #f5f5f5; font-weight: bold; }
+        .preview-content code { 
             background-color: #f5f5f5; 
             padding: 0.2rem 0.4rem; 
             border-radius: 3px; 
             font-family: monospace;
         }
-        pre { 
+        .preview-content pre { 
             background-color: #f5f5f5; 
             padding: 1rem; 
             border-radius: 5px; 
             overflow-x: auto;
         }
-        blockquote {
+        .preview-content blockquote {
             border-left: 4px solid #ddd;
             margin: 0;
             padding-left: 1rem;
             color: #666;
         }
-        img { max-width: 100%; height: auto; }
+        .preview-content img { max-width: 100%; height: auto; }`;
+
+    // Optimize CSS for PDF rendering if we received custom CSS
+    if (options.styleCSS) {
+      styleCSS = optimizeCSSForPDF(styleCSS);
+      console.log('CSS optimized for PDF rendering');
+    }
+    
+    const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${options.title || 'Exported Document'}</title>
+    <style>
         @media print {
-            body { margin: 0; padding: 1rem; }
+            body { margin: 0; }
+            @page { margin: 0.5in; }
         }
+        ${styleCSS}
     </style>
 </head>
 <body>
-    ${html}
+    <div class="preview-content">
+        ${html}
+    </div>
 </body>
 </html>`;
+
 
     const browser = await puppeteer.launch({ 
       headless: true,
@@ -117,14 +169,9 @@ async function exportToHTML(markdown, outputPath, options = {}) {
     const html = marked(markdown);
     const title = options.title || 'Exported Document';
     
-    const fullHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <style>
-        body {
+    // Use provided styleCSS or fallback to default
+    const styleCSS = options.styleCSS || `
+        .preview-content {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             max-width: 800px;
@@ -133,47 +180,48 @@ async function exportToHTML(markdown, outputPath, options = {}) {
             color: #333;
             background-color: #fff;
         }
-        h1, h2, h3, h4, h5, h6 { 
+        .preview-content h1, .preview-content h2, .preview-content h3, 
+        .preview-content h4, .preview-content h5, .preview-content h6 { 
             margin-top: 2rem; 
             margin-bottom: 1rem; 
             color: #222;
         }
-        h1 { 
+        .preview-content h1 { 
             border-bottom: 2px solid #eee; 
             padding-bottom: 0.5rem; 
             font-size: 2.2rem;
         }
-        h2 { 
+        .preview-content h2 { 
             border-bottom: 1px solid #eee; 
             padding-bottom: 0.3rem; 
             font-size: 1.8rem;
         }
-        h3 { font-size: 1.5rem; }
-        h4 { font-size: 1.3rem; }
-        h5 { font-size: 1.1rem; }
-        h6 { font-size: 1rem; }
+        .preview-content h3 { font-size: 1.5rem; }
+        .preview-content h4 { font-size: 1.3rem; }
+        .preview-content h5 { font-size: 1.1rem; }
+        .preview-content h6 { font-size: 1rem; }
         
-        table { 
+        .preview-content table { 
             border-collapse: collapse; 
             width: 100%; 
             margin: 1rem 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        th, td { 
+        .preview-content th, .preview-content td { 
             border: 1px solid #ddd; 
             padding: 0.75rem; 
             text-align: left; 
         }
-        th { 
+        .preview-content th { 
             background-color: #f8f9fa; 
             font-weight: 600;
             color: #495057;
         }
-        tr:nth-child(even) {
+        .preview-content tr:nth-child(even) {
             background-color: #f8f9fa;
         }
         
-        code { 
+        .preview-content code { 
             background-color: #f8f9fa; 
             padding: 0.2rem 0.4rem; 
             border-radius: 3px; 
@@ -181,20 +229,20 @@ async function exportToHTML(markdown, outputPath, options = {}) {
             font-size: 0.9em;
             color: #d63384;
         }
-        pre { 
+        .preview-content pre { 
             background-color: #f8f9fa; 
             padding: 1rem; 
             border-radius: 5px; 
             overflow-x: auto;
             border: 1px solid #e9ecef;
         }
-        pre code {
+        .preview-content pre code {
             background: none;
             padding: 0;
             color: #333;
         }
         
-        blockquote {
+        .preview-content blockquote {
             border-left: 4px solid #007bff;
             margin: 1rem 0;
             padding: 0.5rem 1rem;
@@ -202,29 +250,29 @@ async function exportToHTML(markdown, outputPath, options = {}) {
             color: #495057;
         }
         
-        a {
+        .preview-content a {
             color: #007bff;
             text-decoration: none;
         }
-        a:hover {
+        .preview-content a:hover {
             text-decoration: underline;
         }
         
-        img { 
+        .preview-content img { 
             max-width: 100%; 
             height: auto; 
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        ul, ol {
+        .preview-content ul, .preview-content ol {
             padding-left: 2rem;
         }
-        li {
+        .preview-content li {
             margin-bottom: 0.5rem;
         }
         
-        hr {
+        .preview-content hr {
             border: none;
             border-top: 2px solid #eee;
             margin: 2rem 0;
@@ -236,13 +284,33 @@ async function exportToHTML(markdown, outputPath, options = {}) {
             border-top: 1px solid #eee;
             padding-top: 1rem;
             margin-top: 2rem;
+        }`;
+    
+    const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        ${styleCSS}
+        
+        /* Additional export metadata styling */
+        .export-meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
-    ${html}
-    <div class="export-meta">
-        <p>Exported from willisMD on ${new Date().toLocaleString()}</p>
+    <div class="preview-content">
+        ${html}
+        <div class="export-meta">
+            <p>Exported from willisMD on ${new Date().toLocaleString()}</p>
+        </div>
     </div>
 </body>
 </html>`;
@@ -356,59 +424,61 @@ async function exportToEPUB(markdown, outputPath, options = {}) {
 </html>`;
     archive.append(chapterXhtml, { name: 'OEBPS/chapter1.xhtml' });
     
-    // Create OEBPS/style.css
-    const styleCss = `
-body {
+    // Create OEBPS/style.css - Use provided styleCSS or fallback to default
+    // Convert the provided styles to work with EPUB (remove .preview-content wrapper if present)
+    let styleCss = options.styleCSS || `
+.preview-content {
   font-family: Georgia, 'Times New Roman', serif;
   line-height: 1.6;
   margin: 1em;
   color: #333;
 }
 
-h1, h2, h3, h4, h5, h6 {
+.preview-content h1, .preview-content h2, .preview-content h3, 
+.preview-content h4, .preview-content h5, .preview-content h6 {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   color: #222;
 }
 
-h1 { font-size: 1.8em; }
-h2 { font-size: 1.5em; }
-h3 { font-size: 1.3em; }
-h4 { font-size: 1.1em; }
-h5 { font-size: 1em; }
-h6 { font-size: 0.9em; }
+.preview-content h1 { font-size: 1.8em; }
+.preview-content h2 { font-size: 1.5em; }
+.preview-content h3 { font-size: 1.3em; }
+.preview-content h4 { font-size: 1.1em; }
+.preview-content h5 { font-size: 1em; }
+.preview-content h6 { font-size: 0.9em; }
 
-p {
+.preview-content p {
   margin: 1em 0;
   text-align: justify;
 }
 
-table {
+.preview-content table {
   border-collapse: collapse;
   width: 100%;
   margin: 1em 0;
 }
 
-th, td {
+.preview-content th, .preview-content td {
   border: 1px solid #ddd;
   padding: 0.5em;
   text-align: left;
 }
 
-th {
+.preview-content th {
   background-color: #f5f5f5;
   font-weight: bold;
 }
 
-code {
+.preview-content code {
   background-color: #f5f5f5;
   padding: 0.2em 0.4em;
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
 }
 
-pre {
+.preview-content pre {
   background-color: #f5f5f5;
   padding: 1em;
   overflow-x: auto;
@@ -416,7 +486,7 @@ pre {
   font-size: 0.9em;
 }
 
-blockquote {
+.preview-content blockquote {
   border-left: 3px solid #ddd;
   margin: 1em 0;
   padding-left: 1em;
@@ -424,31 +494,34 @@ blockquote {
   font-style: italic;
 }
 
-a {
+.preview-content a {
   color: #0066cc;
   text-decoration: none;
 }
 
-a:hover {
+.preview-content a:hover {
   text-decoration: underline;
 }
 
-img {
+.preview-content img {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 1em auto;
 }
 
-ul, ol {
+.preview-content ul, .preview-content ol {
   margin: 1em 0;
   padding-left: 2em;
 }
 
-li {
+.preview-content li {
   margin: 0.5em 0;
 }
 `;
+    
+    // Convert .preview-content selectors to body/root selectors for EPUB
+    styleCss = styleCss.replace(/\.preview-content\s*/g, '');
     archive.append(styleCss, { name: 'OEBPS/style.css' });
     
     // Finalize the archive
@@ -487,6 +560,36 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
     
     const title = options.title || 'Exported Document';
     
+    // Extract some basic styling preferences from styleCSS if provided
+    const styleCSS = options.styleCSS || '';
+    let fontFamily = 'Times New Roman';
+    let headingColor = '#000000';
+    
+    // Try to extract font-family from the CSS (basic parsing)
+    const fontFamilyMatch = styleCSS.match(/font-family:\s*([^;]+)/i);
+    if (fontFamilyMatch) {
+      const fontValue = fontFamilyMatch[1].trim().replace(/['"]/g, '');
+      // Use the first font in the font stack
+      fontFamily = fontValue.split(',')[0].trim() || 'Times New Roman';
+      // Handle system fonts
+      if (fontFamily.includes('system') || fontFamily === '-apple-system') {
+        fontFamily = 'Calibri';
+      } else if (fontFamily === 'Georgia') {
+        fontFamily = 'Georgia';
+      } else if (fontFamily.includes('Arial') || fontFamily.includes('Helvetica')) {
+        fontFamily = 'Arial';
+      }
+    }
+    
+    // Try to extract heading color
+    const headingColorMatch = styleCSS.match(/h1[^}]*color:\s*([^;]+)/i);
+    if (headingColorMatch) {
+      const colorValue = headingColorMatch[1].trim();
+      if (colorValue.startsWith('#')) {
+        headingColor = colorValue.toUpperCase().replace('#', '');
+      }
+    }
+    
     // Convert markdown to HTML first, then to simple text with basic formatting
     const html = marked(markdown);
     
@@ -500,7 +603,9 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
           new TextRun({
             text: title,
             bold: true,
-            size: 28
+            size: 28,
+            font: fontFamily,
+            color: headingColor
           })
         ],
         spacing: { after: 400 }
@@ -554,7 +659,9 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
               new TextRun({
                 text: text,
                 bold: true,
-                size: fontSize
+                size: fontSize,
+                font: fontFamily,
+                color: headingColor
               })
             ],
             spacing: { before: 200, after: 200 }
@@ -574,7 +681,10 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
         docElements.push(
           new Paragraph({
             children: [
-              new TextRun('• ' + text)
+              new TextRun({
+                text: '• ' + text,
+                font: fontFamily
+              })
             ],
             indent: { left: 720 },
             spacing: { after: 120 }
@@ -591,7 +701,8 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
             children: [
               new TextRun({
                 text: text,
-                italics: true
+                italics: true,
+                font: fontFamily
               })
             ],
             indent: { left: 720 },
@@ -604,7 +715,10 @@ async function exportToDOCX(markdown, outputPath, options = {}) {
       // Regular paragraphs
       docElements.push(
         new Paragraph({
-          children: [new TextRun(trimmed)],
+          children: [new TextRun({
+            text: trimmed,
+            font: fontFamily
+          })],
           spacing: { after: 120 }
         })
       );

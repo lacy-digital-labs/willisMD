@@ -1,28 +1,46 @@
 # About willisMD
 
-## Version 0.8.0
+## Version 0.8.7
 
 willisMD is a cross-platform markdown editor designed to make writing and editing markdown documents a seamless experience. Built with modern web technologies and packaged as a desktop application, it combines the simplicity of markdown with the convenience of a native editor.
 
 ## Features
 
 ### 🎯 Core Functionality
+- **Advanced CodeMirror Editor**: Professional text editing with syntax highlighting, line numbers, and code folding
 - **Live Preview**: See your markdown rendered in real-time as you type
-- **Split-Pane View**: Edit and preview side-by-side for optimal workflow
+- **Split-Pane View**: Edit and preview side-by-side with synchronized scrolling
 - **Multi-Tab Support**: Work on multiple documents simultaneously
-- **Syntax Highlighting**: Color-coded markdown syntax for better readability
-- **Wiki Links Suport**: Supports [[link]] format for editing wiki style.
+- **Word Wrap**: Long lines wrap naturally for easier editing
+- **Wiki Links Support**: Supports [[link]] format for wiki-style editing
+- **Find & Replace**: Advanced search with regex support
 
 ### 📁 File Management
+- **File Explorer**: Built-in file tree with folder navigation
 - **Native File Operations**: Open, save, and create files with familiar keyboard shortcuts
 - **Template Support**: Start new documents with pre-defined templates
-- **Recent Files**: Quick access to your recently edited documents
-- **Auto-Save**: Never lose your work with automatic saving (coming soon)
+- **Recent Files & Folders**: Quick access to your recently edited documents and locations
+- **Auto-Save**: Optional automatic saving with configurable intervals
 
-### 🎨 Formatting & Export
-- **Toolbar Support**: Quick access to common markdown formatting
-- **Multiple Export Formats**: Export to HTML, PDF, and DOCX
-- **Clean, Readable Output**: Professional document rendering
+### 🎨 Themes & Export
+- **10 Beautiful Themes**: Choose from Standard, Modern, Manuscript, Business, Informal, Academic, Technical, Minimalist, Classic, and Report styles
+- **Theme-Aware Exports**: All exports use your selected preview theme
+- **Multiple Export Formats**: Export to HTML, PDF, EPUB, and DOCX
+- **Print Support**: Print your documents with proper theme styling
+- **Clean, Professional Output**: Beautiful document rendering across all formats
+
+## What's New in v0.8.7
+
+### Theme Export Fix
+- Fixed theme selection for all export formats (PDF, HTML, EPUB, DOCX)
+- Exports now correctly use your selected preview theme
+- Resolved production build issues with theme loading
+
+### Technical Improvements
+- Enhanced webpack configuration for better stability
+- Improved Content Security Policy
+- Fixed module loading errors in packaged applications
+- Better synchronization between preview and export themes
 
 ## Keyboard Shortcuts
 

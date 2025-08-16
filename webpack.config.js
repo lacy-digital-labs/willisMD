@@ -9,7 +9,8 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'renderer.js'
   },
-  target: 'electron-renderer', // Target electron renderer process
+  target: 'web', // Use web target instead of electron-renderer to avoid automatic externals
+  devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'nosources-source-map', // CSP-compatible source maps
   module: {
     rules: [
       {
@@ -36,20 +37,23 @@ module.exports = {
       "fs": false,
       "crypto": false,
       "stream": false,
-      "util": false
+      "util": false,
+      "global": false
     }
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-    new webpack.DefinePlugin({
-      global: 'globalThis',
+    new webpack.BannerPlugin({
+      banner: 'var global = globalThis;',
+      raw: true
     })
   ],
   devServer: {
     port: 8080,
-    hot: true,
-    historyApiFallback: true
+    hot: false, // Disable hot reloading to avoid events dependency
+    historyApiFallback: true,
+    liveReload: true // Use live reload instead
   }
 };
