@@ -2144,9 +2144,6 @@ function App() {
       const result = await window.electronAPI.preferencesSave(newPreferences);
       setPreferences(newPreferences);
       
-      // Apply theme immediately
-      applyTheme(newPreferences.theme, newPreferences.mode);
-      
       // Update auto save if changed
       if (newPreferences.autoSave !== autoSaveEnabled) {
         setAutoSaveEnabled(newPreferences.autoSave);
@@ -2374,30 +2371,24 @@ function App() {
     
     // Helper function to get current theme selection
     const getCurrentThemeStyle = async () => {
-      console.log('getCurrentThemeStyle: Starting theme detection...');
-      
       // Method 1: Check DOM dropdown (most current UI state)
       const dropdownElement = document.querySelector('select[title="Select preview style"]');
       const domValue = dropdownElement ? dropdownElement.value : null;
-      console.log('getCurrentThemeStyle: DOM dropdown value:', domValue);
       
       // Method 2: Check React state 
       const stateValue = preferences.previewStyle;
-      console.log('getCurrentThemeStyle: React state value:', stateValue);
       
       // Method 3: Try to get from electron preferences directly
       let electronPrefsValue = null;
       try {
         const electronPrefs = await window.electronAPI.preferencesLoad();
         electronPrefsValue = electronPrefs.previewStyle;
-        console.log('getCurrentThemeStyle: Electron prefs value:', electronPrefsValue);
       } catch (error) {
         console.log('getCurrentThemeStyle: Could not load electron prefs:', error);
       }
       
       // Prioritize: DOM > Electron prefs > React state > default
       const finalValue = domValue || electronPrefsValue || stateValue || 'standard';
-      console.log('getCurrentThemeStyle: Final selected value:', finalValue);
       
       return finalValue;
     };
@@ -2414,7 +2405,7 @@ function App() {
       
       setStatus('Exporting to PDF...');
       try {
-        // Get the current theme selection - use live dropdown value
+        // Get the current theme selection
         const selectedStyle = await getCurrentThemeStyle();
         const cssContent = getStyleCSS(selectedStyle);
         console.log('PDF Export: Using theme style:', selectedStyle);
@@ -2754,9 +2745,6 @@ function App() {
         const prefs = await window.electronAPI.preferencesLoad();
         setPreferences(prefs);
         
-        // Apply theme
-        applyTheme(prefs.theme, prefs.mode);
-        
         // Set auto save
         setAutoSaveEnabled(prefs.autoSave || false);
         
@@ -2774,6 +2762,13 @@ function App() {
     
     loadPreferences();
   }, []);
+
+  // Apply theme whenever preferences change
+  useEffect(() => {
+    if (preferences.theme || preferences.mode) {
+      applyTheme(preferences.theme, preferences.mode);
+    }
+  }, [preferences.theme, preferences.mode]);
 
   const handleContentChange = React.useCallback((newContent) => {
     // Use React 18's automatic batching for better performance
@@ -3518,9 +3513,6 @@ function App() {
                   const updatedPrefs = { ...preferences, previewStyle: newStyle };
                   setPreferences(updatedPrefs);
                   
-                  // Apply current theme to ensure light/dark mode is respected
-                  applyTheme(preferences.theme, preferences.mode);
-                  
                   // Save to persistent storage
                   try {
                     await window.electronAPI.preferencesSave(updatedPrefs);
@@ -3561,6 +3553,7 @@ function App() {
             )
           ),
           React.createElement(Preview, {
+            key: `${preferences.theme}-${preferences.mode}-${preferences.previewStyle}`,
             content: currentTab.content,
             onScroll: handleScroll,
             scrollToPercentage: lastScrollSource === 'editor' ? previewScrollPercentage : null,

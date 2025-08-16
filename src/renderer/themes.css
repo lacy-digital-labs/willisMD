@@ -912,86 +912,9 @@ body {
   color: var(--text-muted) !important;
 }
 
-/* Preview styling */
+/* Preview styling - only container background, let themes control their own content */
 .preview {
   background-color: var(--preview-bg);
-  color: var(--preview-text);
-}
-
-/* Force preview content to use theme colors */
-.preview .preview-content {
-  color: var(--preview-text) !important;
-}
-
-.preview .preview-content p,
-.preview .preview-content div,
-.preview .preview-content span,
-.preview .preview-content li,
-.preview .preview-content td {
-  color: var(--preview-text) !important;
-}
-
-.preview h1, .preview h2, .preview h3, .preview h4, .preview h5, .preview h6 {
-  color: var(--text-primary);
-}
-
-.preview code {
-  background-color: var(--bg-tertiary);
-  color: var(--syntax-keyword);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-
-.preview pre {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-.preview pre code {
-  background: none;
-  padding: 0;
-}
-
-.preview blockquote {
-  border-left: 4px solid var(--accent-primary);
-  padding-left: 12px;
-  color: var(--text-secondary);
-  font-style: italic;
-  margin: 16px 0;
-}
-
-.preview a {
-  color: var(--accent-primary);
-  text-decoration: underline;
-}
-
-.preview a:hover {
-  color: var(--accent-hover);
-}
-
-.preview table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 16px 0;
-}
-
-.preview th, .preview td {
-  border: 1px solid var(--border-medium);
-  padding: 8px 12px;
-  text-align: left;
-}
-
-.preview th {
-  background-color: var(--bg-tertiary);
-  font-weight: bold;
-}
-
-.preview tr:nth-child(even) {
-  background-color: var(--bg-secondary);
 }
 
 /* Sidebar/Explorer styling */

@@ -6,7 +6,7 @@ export const previewStyles = {
       .preview-content {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         line-height: 1.6;
-        color: #333;
+        color: var(--preview-text);
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
@@ -15,49 +15,63 @@ export const previewStyles = {
         margin-top: 24px;
         margin-bottom: 16px;
         font-weight: 600;
+        color: var(--text-primary);
       }
-      .preview-content h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+      .preview-content h1 { font-size: 2em; border-bottom: 1px solid var(--border-light); padding-bottom: 0.3em; }
       .preview-content h2 { font-size: 1.5em; }
       .preview-content h3 { font-size: 1.25em; }
       .preview-content pre {
-        background-color: #f6f8fa;
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
         padding: 16px;
         overflow: auto;
         border-radius: 6px;
       }
       .preview-content code {
-        background-color: #f6f8fa;
+        background-color: var(--bg-tertiary);
+        color: var(--syntax-keyword);
         padding: 0.2em 0.4em;
         border-radius: 3px;
         font-size: 85%;
       }
       .preview-content blockquote {
-        border-left: 4px solid #dfe2e5;
+        border-left: 4px solid var(--accent-primary);
         padding-left: 16px;
         margin-left: 0;
-        color: #6a737d;
+        color: var(--text-secondary);
+        font-style: italic;
       }
       .preview-content table {
         border-collapse: collapse;
         margin: 16px 0;
+        width: 100%;
       }
       .preview-content table th, .preview-content table td {
-        border: 1px solid #dfe2e5;
+        border: 1px solid var(--border-medium);
         padding: 6px 13px;
+        text-align: left;
+      }
+      .preview-content table th {
+        background-color: var(--bg-tertiary);
+        font-weight: bold;
       }
       .preview-content table tr:nth-child(2n) {
-        background-color: #f6f8fa;
+        background-color: var(--bg-secondary);
       }
       .preview-content img {
         max-width: 100%;
         height: auto;
       }
       .preview-content a {
-        color: #0366d6;
+        color: var(--accent-primary);
         text-decoration: none;
       }
       .preview-content a:hover {
+        color: var(--accent-hover);
         text-decoration: underline;
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: var(--preview-text);
       }
     `
   },
@@ -73,6 +87,9 @@ export const previewStyles = {
         margin: 0 auto;
         padding: 40px 20px;
         background: #fafafa;
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #1a1a1a;
       }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         margin-top: 32px;
@@ -181,6 +198,9 @@ export const previewStyles = {
         padding: 1in;
         background: #fff;
       }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #000;
+      }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Courier New', Courier, monospace;
         text-transform: uppercase;
@@ -282,6 +302,9 @@ export const previewStyles = {
         margin: 0 auto;
         padding: 30px;
         background: #fff;
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #212529;
       }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Arial', 'Helvetica Neue', sans-serif;
@@ -397,6 +420,9 @@ export const previewStyles = {
             #e8e8e8 27px,
             #e8e8e8 28px
           );
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #333;
       }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
@@ -541,6 +567,9 @@ export const previewStyles = {
         padding: 40px 30px;
         background: #ffffff;
       }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #2c2c2c;
+      }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Times New Roman', 'Georgia', serif;
         margin-top: 36px;
@@ -649,6 +678,9 @@ export const previewStyles = {
         margin: 0 auto;
         padding: 30px;
         background: #ffffff;
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #333333;
       }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -766,6 +798,9 @@ export const previewStyles = {
         padding: 60px 40px;
         background: #ffffff;
       }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #444444;
+      }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Helvetica Neue', 'Arial', sans-serif;
         margin-top: 48px;
@@ -870,6 +905,9 @@ export const previewStyles = {
         padding: 40px 35px;
         background: #fffef8;
         border: 1px solid #e8e1d4;
+      }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #1a1a1a;
       }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Baskerville', 'Georgia', 'Times New Roman', serif;
@@ -1020,6 +1058,9 @@ export const previewStyles = {
         background: #ffffff;
         border: 1px solid #e0e0e0;
       }
+      .preview-content p, .preview-content div, .preview-content span, .preview-content li, .preview-content td {
+        color: #2c2c2c;
+      }
       .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
         font-family: 'Calibri', 'Arial', sans-serif;
         margin-top: 32px;
@@ -1161,7 +1202,8 @@ export const previewStyles = {
 
 // Helper function to get style CSS by name
 export function getStyleCSS(styleName) {
-  return previewStyles[styleName]?.css || previewStyles.standard.css;
+  const baseCSS = previewStyles[styleName]?.css || previewStyles.standard.css;
+  return baseCSS;
 }
 
 // Helper function to get all style names
