@@ -171,9 +171,14 @@ The CodeMirror editor is enabled by default for all users, providing a consisten
 4. No plugin system for extensibility
 5. Some CodeMirror features could be expanded (vim bindings, more extensions)
 
-## Recent Updates (v0.9.1)
+## Recent Updates (v0.9.2)
 
-### Search Functionality for Knowledge Management
+### Bug Fix: Theme Mode Issue
+- **Fixed theme mode bug** - Preview style changes now properly respect light/dark mode settings
+- **Immediate theme application** - No longer need to go into preferences to fix theme mode after changing preview style
+- **Enhanced user experience** - Theme and mode now work seamlessly together when switching preview styles
+
+### Search Functionality for Knowledge Management (v0.9.1)
 - **Added comprehensive search feature** - Search for text across all files in the current folder and subfolders
 - **Smart file filtering** - Automatically searches only text files (.md, .txt, .json, .js, .html, .css, .yml, .yaml, .xml)
 - **Intuitive search UI** - Search button in file explorer toolbar with expandable search bar
