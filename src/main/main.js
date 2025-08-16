@@ -146,7 +146,566 @@ function getThemeCSS(themeName) {
         border-bottom-color: #667eea;
       }
     `,
-    // Add other themes as needed - for now just standard and modern for testing
+    manuscript: `
+      .preview-content {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        line-height: 2;
+        color: #2c3e50;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #fffef8;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'Garamond', 'Georgia', serif;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-weight: 400;
+        color: #1a252f;
+      }
+      .preview-content h1 { font-size: 2.5em; text-align: center; margin: 40px 0; }
+      .preview-content h2 { font-size: 2em; }
+      .preview-content h3 { font-size: 1.6em; }
+      .preview-content p {
+        text-indent: 2em;
+        margin-bottom: 1em;
+        text-align: justify;
+      }
+      .preview-content pre {
+        background-color: #f9f7f3;
+        padding: 20px;
+        border-left: 3px solid #8b7355;
+        font-family: 'Courier New', monospace;
+      }
+      .preview-content code {
+        background-color: #f9f7f3;
+        padding: 0.2em 0.4em;
+        font-family: 'Courier New', monospace;
+      }
+      .preview-content blockquote {
+        font-style: italic;
+        margin: 30px 40px;
+        padding: 0;
+        quotes: "\\201C""\\201D""\\2018""\\2019";
+      }
+      .preview-content blockquote:before {
+        content: open-quote;
+        font-size: 3em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 30px auto;
+        font-size: 0.95em;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #8b7355;
+        padding: 10px 15px;
+      }
+      .preview-content table th {
+        background-color: #f9f7f3;
+        font-weight: 600;
+      }
+    `,
+    business: `
+      .preview-content {
+        font-family: 'Calibri', 'Arial', sans-serif;
+        line-height: 1.5;
+        color: #212529;
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 30px;
+        background: white;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'Arial', sans-serif;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #003366;
+      }
+      .preview-content h1 { font-size: 24pt; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+      .preview-content h2 { font-size: 18pt; }
+      .preview-content h3 { font-size: 14pt; }
+      .preview-content pre {
+        background-color: #f5f5f5;
+        padding: 15px;
+        border: 1px solid #ccc;
+        font-family: 'Consolas', monospace;
+      }
+      .preview-content code {
+        background-color: #f5f5f5;
+        padding: 2px 4px;
+        font-family: 'Consolas', monospace;
+      }
+      .preview-content blockquote {
+        border-left: 4px solid #003366;
+        padding-left: 15px;
+        margin: 15px 0;
+        color: #555;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 20px 0;
+        width: 100%;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #003366;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      .preview-content table th {
+        background-color: #003366;
+        color: white;
+        font-weight: bold;
+      }
+      .preview-content table tr:nth-child(even) {
+        background-color: #f0f0f0;
+      }
+      .preview-content ul, .preview-content ol {
+        padding-left: 25px;
+      }
+      .preview-content li {
+        margin-bottom: 5px;
+      }
+    `,
+    informal: `
+      .preview-content {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        line-height: 1.7;
+        color: #333;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        background: linear-gradient(135deg, #fff5e6 0%, #ffe6f0 100%);
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #ff6b6b;
+      }
+      .preview-content h1 { 
+        font-size: 2.5em; 
+        text-align: center;
+        color: #ff6b6b;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      }
+      .preview-content h2 { font-size: 2em; color: #4ecdc4; }
+      .preview-content h3 { font-size: 1.6em; color: #45b7d1; }
+      .preview-content pre {
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px dashed #ff6b6b;
+        overflow-x: auto;
+      }
+      .preview-content code {
+        background: #ffeb3b;
+        padding: 0.3em 0.5em;
+        border-radius: 5px;
+        font-family: monospace;
+      }
+      .preview-content blockquote {
+        border-left: 5px solid #ff6b6b;
+        padding-left: 20px;
+        margin: 20px 0;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-style: italic;
+      }
+      .preview-content table {
+        border-collapse: separate;
+        border-spacing: 5px;
+        margin: 20px 0;
+      }
+      .preview-content table th, .preview-content table td {
+        padding: 10px;
+        background: white;
+        border-radius: 10px;
+      }
+      .preview-content table th {
+        background: #ff6b6b;
+        color: white;
+        font-weight: bold;
+      }
+      .preview-content a {
+        color: #ff6b6b;
+        text-decoration: none;
+        border-bottom: 2px dotted #ff6b6b;
+      }
+      .preview-content a:hover {
+        background: #ffeb3b;
+      }
+    `,
+    academic: `
+      .preview-content {
+        font-family: 'Times New Roman', serif;
+        line-height: 1.8;
+        color: #000;
+        max-width: 750px;
+        margin: 0 auto;
+        padding: 40px;
+        background: white;
+        font-size: 12pt;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'Times New Roman', serif;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #000;
+      }
+      .preview-content h1 { font-size: 14pt; text-align: center; text-transform: uppercase; }
+      .preview-content h2 { font-size: 12pt; text-transform: uppercase; }
+      .preview-content h3 { font-size: 12pt; font-style: italic; }
+      .preview-content p {
+        text-align: justify;
+        text-indent: 0.5in;
+        margin-bottom: 12pt;
+      }
+      .preview-content pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border: 1px solid #000;
+        font-family: 'Courier New', monospace;
+        font-size: 10pt;
+      }
+      .preview-content code {
+        font-family: 'Courier New', monospace;
+        font-size: 10pt;
+      }
+      .preview-content blockquote {
+        margin-left: 0.5in;
+        margin-right: 0.5in;
+        font-size: 10pt;
+        line-height: 1.5;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 20px auto;
+        font-size: 10pt;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #000;
+        padding: 5px 10px;
+        text-align: left;
+      }
+      .preview-content table th {
+        font-weight: bold;
+      }
+      .preview-content a {
+        color: #000;
+        text-decoration: underline;
+      }
+      .preview-content .citation {
+        margin-left: 0.5in;
+        text-indent: -0.5in;
+      }
+    `,
+    technical: `
+      .preview-content {
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+        line-height: 1.6;
+        color: #e0e0e0;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background: #1e1e1e;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: #61dafb;
+      }
+      .preview-content h1 { font-size: 2.5em; border-bottom: 2px solid #61dafb; padding-bottom: 10px; }
+      .preview-content h2 { font-size: 2em; color: #98c379; }
+      .preview-content h3 { font-size: 1.6em; color: #e06c75; }
+      .preview-content pre {
+        background: #282c34;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #3e4451;
+        overflow-x: auto;
+        font-size: 14px;
+      }
+      .preview-content code {
+        background: #282c34;
+        color: #abb2bf;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+      .preview-content blockquote {
+        border-left: 4px solid #61dafb;
+        padding-left: 20px;
+        margin: 20px 0;
+        color: #abb2bf;
+        font-style: italic;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 20px 0;
+        width: 100%;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #3e4451;
+        padding: 10px;
+        text-align: left;
+      }
+      .preview-content table th {
+        background: #282c34;
+        color: #61dafb;
+        font-weight: 600;
+      }
+      .preview-content table tr:nth-child(even) {
+        background: #282c34;
+      }
+      .preview-content a {
+        color: #61dafb;
+        text-decoration: none;
+      }
+      .preview-content a:hover {
+        text-decoration: underline;
+      }
+      .preview-content ::selection {
+        background: #3e4451;
+        color: #fff;
+      }
+    `,
+    minimalist: `
+      .preview-content {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.8;
+        color: #111;
+        max-width: 650px;
+        margin: 0 auto;
+        padding: 60px 20px;
+        background: #fff;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-weight: 300;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        letter-spacing: -0.02em;
+      }
+      .preview-content h1 { font-size: 2.5em; font-weight: 200; }
+      .preview-content h2 { font-size: 1.8em; }
+      .preview-content h3 { font-size: 1.4em; }
+      .preview-content p {
+        margin-bottom: 20px;
+      }
+      .preview-content pre {
+        background: #f7f7f7;
+        padding: 20px;
+        border: none;
+        overflow-x: auto;
+      }
+      .preview-content code {
+        background: #f7f7f7;
+        padding: 0.2em 0.4em;
+        font-size: 0.9em;
+      }
+      .preview-content blockquote {
+        border-left: 2px solid #111;
+        padding-left: 20px;
+        margin: 30px 0;
+        font-style: italic;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 30px 0;
+        width: 100%;
+      }
+      .preview-content table th, .preview-content table td {
+        border-bottom: 1px solid #eee;
+        padding: 12px 0;
+        text-align: left;
+      }
+      .preview-content table th {
+        font-weight: 600;
+        border-bottom: 2px solid #111;
+      }
+      .preview-content a {
+        color: #111;
+        text-decoration: none;
+        border-bottom: 1px solid #111;
+      }
+      .preview-content a:hover {
+        border-bottom: 2px solid #111;
+      }
+      .preview-content hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 40px 0;
+      }
+    `,
+    classic: `
+      .preview-content {
+        font-family: 'Book Antiqua', 'Palatino', serif;
+        line-height: 1.7;
+        color: #2c2c2c;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 40px;
+        background: #f5f5dc;
+        border: 1px solid #d4d4aa;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'Book Antiqua', 'Palatino', serif;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-weight: normal;
+        color: #4a4a4a;
+      }
+      .preview-content h1 { 
+        font-size: 2.2em; 
+        text-align: center; 
+        border-top: 3px double #8b7355;
+        border-bottom: 3px double #8b7355;
+        padding: 15px 0;
+        margin: 30px 0;
+      }
+      .preview-content h2 { font-size: 1.8em; border-bottom: 1px solid #8b7355; padding-bottom: 5px; }
+      .preview-content h3 { font-size: 1.5em; font-style: italic; }
+      .preview-content p {
+        text-align: justify;
+        margin-bottom: 15px;
+      }
+      .preview-content pre {
+        background: #efefd6;
+        padding: 15px;
+        border: 1px solid #8b7355;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+      }
+      .preview-content code {
+        background: #efefd6;
+        padding: 0.2em 0.4em;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+      }
+      .preview-content blockquote {
+        border-left: 3px solid #8b7355;
+        padding-left: 20px;
+        margin: 20px 10px;
+        font-style: italic;
+        color: #5a5a5a;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 20px auto;
+        width: 90%;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #8b7355;
+        padding: 8px 12px;
+      }
+      .preview-content table th {
+        background: #d4d4aa;
+        font-weight: bold;
+      }
+      .preview-content a {
+        color: #8b4513;
+        text-decoration: none;
+      }
+      .preview-content a:hover {
+        text-decoration: underline;
+      }
+    `,
+    report: `
+      .preview-content {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #000;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        background: white;
+        font-size: 11pt;
+      }
+      .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
+        font-family: 'Arial', sans-serif;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #000;
+      }
+      .preview-content h1 { 
+        font-size: 16pt; 
+        text-align: center;
+        margin: 30px 0;
+        text-transform: uppercase;
+      }
+      .preview-content h2 { 
+        font-size: 14pt; 
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+      }
+      .preview-content h3 { font-size: 12pt; }
+      .preview-content p {
+        text-align: justify;
+        margin-bottom: 10pt;
+      }
+      .preview-content pre {
+        background: #f0f0f0;
+        padding: 10px;
+        border: 1px solid #999;
+        font-family: 'Courier New', monospace;
+        font-size: 9pt;
+      }
+      .preview-content code {
+        font-family: 'Courier New', monospace;
+        font-size: 9pt;
+        background: #f0f0f0;
+        padding: 1px 3px;
+      }
+      .preview-content blockquote {
+        margin-left: 0.5in;
+        margin-right: 0.5in;
+        padding: 10px;
+        background: #f0f0f0;
+        border-left: 3px solid #999;
+      }
+      .preview-content table {
+        border-collapse: collapse;
+        margin: 15px 0;
+        width: 100%;
+        font-size: 10pt;
+      }
+      .preview-content table th, .preview-content table td {
+        border: 1px solid #000;
+        padding: 5px 8px;
+        text-align: left;
+      }
+      .preview-content table th {
+        background: #e0e0e0;
+        font-weight: bold;
+        text-align: center;
+      }
+      .preview-content table caption {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .preview-content a {
+        color: #000;
+        text-decoration: underline;
+      }
+      .preview-content .page-break {
+        page-break-after: always;
+      }
+      .preview-content strong {
+        font-weight: bold;
+      }
+      .preview-content em {
+        font-style: italic;
+      }
+    `
   };
   
   // Return the requested theme or fall back to standard
@@ -812,8 +1371,7 @@ ipcMain.handle('export-html', async (event, { markdown, title, styleCSS }) => {
     // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
     const currentPrefs = await preferencesManager.load();
     const currentTheme = currentPrefs.previewStyle || 'standard';
-    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
-    const correctCSS = getStyleCSS(currentTheme);
+    const correctCSS = getThemeCSS(currentTheme);
     console.log('Main process HTML export: Using theme', currentTheme);
     
     // Remove .md extension if present
@@ -839,8 +1397,7 @@ ipcMain.handle('export-epub', async (event, { markdown, title, author, styleCSS 
     // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
     const currentPrefs = await preferencesManager.load();
     const currentTheme = currentPrefs.previewStyle || 'standard';
-    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
-    const correctCSS = getStyleCSS(currentTheme);
+    const correctCSS = getThemeCSS(currentTheme);
     console.log('Main process EPUB export: Using theme', currentTheme);
     
     // Remove .md extension if present
@@ -866,8 +1423,7 @@ ipcMain.handle('export-docx', async (event, { markdown, title, styleCSS }) => {
     // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
     const currentPrefs = await preferencesManager.load();
     const currentTheme = currentPrefs.previewStyle || 'standard';
-    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
-    const correctCSS = getStyleCSS(currentTheme);
+    const correctCSS = getThemeCSS(currentTheme);
     console.log('Main process DOCX export: Using theme', currentTheme);
     
     // Remove .md extension if present
@@ -894,8 +1450,7 @@ ipcMain.handle('print-preview', async (event, { html, title, styleCSS }) => {
     // OVERRIDE: Get the current theme from saved preferences instead of relying on renderer state
     const currentPrefs = await preferencesManager.load();
     const currentTheme = currentPrefs.previewStyle || 'standard';
-    const { getStyleCSS } = require(path.join(__dirname, '../shared/previewStyles.js'));
-    const correctCSS = getStyleCSS(currentTheme);
+    const correctCSS = getThemeCSS(currentTheme);
     console.log('Main process Print: Using theme', currentTheme);
     
     // Create a hidden window for printing
