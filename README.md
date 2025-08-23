@@ -2,6 +2,9 @@
 
 A cross-platform markdown editor with live preview and advanced editing capabilities, built with Electron and React.  You might ask why create another markdown editor?  While there are a lot of editors out there, I didn't find one that was fully open source, multi-platform (Linux, Mac, Windows) that I really liked.  I wanted simple file browser and markdown editing with multiple tabs and live preview and an option to auto save and use basic templates.  So I used Anthropic Claude to help create it.
 
+willisMD is open source and built as a passion project, but if its useful to you consider throwing a few dollars are way as a donation to continue the effort.  
+
+[:heart: Sponsor](https://buy.stripe.com/00weVcb8WgmJ4571SW4F200)
 ## 🌟 Overview
 
 willisMD is a powerful yet intuitive markdown editor designed for writers, developers, and content creators. It combines the simplicity of markdown with the power of modern text editing, featuring an advanced CodeMirror editor and real-time preview.
