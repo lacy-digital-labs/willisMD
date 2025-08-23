@@ -5,7 +5,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
-  writeFile: (filePath, content) => ipcRenderer.invoke('write-file', filePath, content),
+  writeFile: (filePath, content, expectedMtime) => ipcRenderer.invoke('write-file', filePath, content, expectedMtime),
+  checkFileModified: (filePath, expectedMtime) => ipcRenderer.invoke('check-file-modified', filePath, expectedMtime),
   showSaveDialog: () => ipcRenderer.invoke('show-save-dialog'),
   readDirectory: (dirPath) => ipcRenderer.invoke('read-directory', dirPath),
   searchInFiles: (searchData) => ipcRenderer.invoke('search-in-files', searchData),

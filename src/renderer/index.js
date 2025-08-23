@@ -3,9 +3,13 @@ import ReactDOM from 'react-dom/client';
 import { marked } from 'marked';
 import { highlightMarkdown } from './SyntaxHighlighter';
 import * as MarkdownUtils from './MarkdownUtils';
-import AboutDialog from './components/AboutDialog';
-import HelpDialog from './components/HelpDialog';
+// Lazy load dialogs to reduce initial bundle size
+const AboutDialog = React.lazy(() => import('./components/AboutDialog'));
+const HelpDialog = React.lazy(() => import('./components/HelpDialog'));
 import CodeMirrorEditor from './components/CodeMirrorEditor';
+import LintPanel from './components/LintPanel';
+// Lazy load markdown linter to reduce initial bundle
+const loadMarkdownLinter = () => import('./markdownLinter');
 import { previewStyles, getStyleCSS, getStyleNames } from '../shared/previewStyles';
 import './styles.css';
 import './themes.css';
@@ -317,7 +321,8 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
           content: content,
           path: filePath,
-          isDirty: false // File is saved, so not dirty
+          isDirty: false, // File is saved, so not dirty
+          mtime: null // New file, will get mtime after save
         };
         
         // Notify parent component to add the tab
@@ -349,27 +354,6 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
     });
   };
 
-  const processFolderCreation = async (parentPath, folderName) => {
-    if (!folderName) {
-      return;
-    }
-    
-    const newFolderPath = `${parentPath}/${folderName}`;
-    try {
-      const result = await window.electronAPI.createFolder(newFolderPath);
-      if (result.success) {
-        // Refresh to show the new folder
-        refreshExplorer();
-      } else {
-        console.error('Failed to create folder:', result.error);
-        alert(`Failed to create folder: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      alert(`Error creating folder: ${error.message}`);
-    }
-    setContextMenu(null);
-  };
   
   const handleDeleteItem = async (item) => {
     const itemType = item.isDirectory ? 'folder' : 'file';
@@ -968,7 +952,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
           style: {
             width: '100%',
             padding: '8px 12px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-light)',
             borderRadius: '4px',
             fontSize: '14px',
             marginBottom: '15px'
@@ -1000,7 +984,7 @@ const FileExplorer = React.forwardRef(({ currentFolder, onFileClick, onFolderCha
             onClick: () => setShowInputDialog(null),
             style: {
               padding: '6px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-light)',
               borderRadius: '4px',
               backgroundColor: '#f5f5f5',
               cursor: 'pointer'
@@ -1073,7 +1057,7 @@ function TableSizeSelector({ onSelect, onClose }) {
   const cellStyle = (row, col) => ({
     width: '16px',
     height: '16px',
-    border: '1px solid #ddd',
+    border: '1px solid var(--border-light)',
     backgroundColor: (row <= hoveredCell.row && col <= hoveredCell.col) ? 'var(--success)' : 'var(--bg-primary)',
     cursor: 'pointer'
   });
@@ -1103,8 +1087,8 @@ function TableSizeSelector({ onSelect, onClose }) {
   
   return React.createElement('div', {
     style: {
-      backgroundColor: '#fff',
-      border: '1px solid #ccc',
+      backgroundColor: 'var(--bg-primary)',
+      border: '1px solid var(--border-medium)',
       borderRadius: '4px',
       padding: '4px'
     }
@@ -1129,9 +1113,9 @@ function TableDropdown({ onFormat }) {
   const dropdownRef = useRef(null);
   
   const buttonStyle = {
-    border: '1px solid #ddd',
+    border: '1px solid var(--border-light)',
     backgroundColor: 'var(--bg-tertiary)',
-    color: '#333',
+    color: 'var(--text-primary)',
     padding: '6px 10px',
     margin: '0 2px',
     cursor: 'pointer',
@@ -1146,10 +1130,10 @@ function TableDropdown({ onFormat }) {
     position: 'absolute',
     top: '100%',
     left: '0',
-    backgroundColor: '#fff',
-    border: '1px solid #ccc',
+    backgroundColor: 'var(--bg-primary)',
+    border: '1px solid var(--border-medium)',
     borderRadius: '4px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    boxShadow: '0 2px 8px var(--shadow-medium)',
     zIndex: 1000,
     minWidth: '180px',
     padding: '4px 0'
@@ -1159,8 +1143,8 @@ function TableDropdown({ onFormat }) {
     padding: '8px 12px',
     cursor: 'pointer',
     fontSize: '13px',
-    color: '#333',
-    borderBottom: '1px solid #f0f0f0'
+    color: 'var(--text-primary)',
+    borderBottom: '1px solid var(--border-light)'
   };
   
   useEffect(() => {
@@ -1192,7 +1176,7 @@ function TableDropdown({ onFormat }) {
     React.createElement('button', {
       style: {
         ...buttonStyle,
-        backgroundColor: isOpen ? '#e8e8e8' : buttonStyle.backgroundColor
+        backgroundColor: isOpen ? 'var(--bg-accent)' : buttonStyle.backgroundColor
       },
       onClick: () => setIsOpen(!isOpen),
       title: 'Table Operations'
@@ -1206,14 +1190,14 @@ function TableDropdown({ onFormat }) {
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => setShowSizeSelector(true),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '📊 Insert Table...'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('insert-table'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '📋 Quick Table (3×3)'),
       
@@ -1224,63 +1208,63 @@ function TableDropdown({ onFormat }) {
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-add-row-after'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '➕ Add Row After'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-add-row-before'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '⬆️ Add Row Before'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-delete-row'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '❌ Delete Row'),
       
       React.createElement('div', {
-        style: { ...menuItemStyle, borderBottom: '2px solid #eee' },
+        style: { ...menuItemStyle, borderBottom: '2px solid var(--border-medium)' },
         onClick: () => handleAction('table-add-column-after'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '➕ Add Column After'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-add-column-before'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '⬅️ Add Column Before'),
       
       React.createElement('div', {
-        style: { ...menuItemStyle, borderBottom: '2px solid #eee' },
+        style: { ...menuItemStyle, borderBottom: '2px solid var(--border-medium)' },
         onClick: () => handleAction('table-delete-column'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '❌ Delete Column'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-align-left'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '⬅️ Align Left'),
       
       React.createElement('div', {
         style: menuItemStyle,
         onClick: () => handleAction('table-align-center'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '⬌ Align Center'),
       
       React.createElement('div', {
         style: { ...menuItemStyle, borderBottom: 'none' },
         onClick: () => handleAction('table-align-right'),
-        onMouseEnter: (e) => e.target.style.backgroundColor = '#f0f0f0',
+        onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
         onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent'
       }, '➡️ Align Right')
     ),
@@ -1418,6 +1402,13 @@ function Toolbar({ onFormat }) {
 // Preferences Dialog Component
 function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
   const [localPrefs, setLocalPrefs] = useState({ ...preferences });
+  
+  // Update local preferences when the dialog opens with new preferences
+  React.useEffect(() => {
+    if (isOpen) {
+      setLocalPrefs({ ...preferences });
+    }
+  }, [isOpen, preferences]);
   
   if (!isOpen) return null;
   
@@ -1799,6 +1790,207 @@ function PreferencesDialog({ isOpen, onClose, preferences, onSave }) {
         }, 'Choose how your markdown preview and printed documents will appear')
       ),
       
+      // Markdown Linting Settings
+      React.createElement('div', {
+        style: { marginBottom: '20px' }
+      },
+        React.createElement('h3', {
+          style: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+            margin: '0 0 12px 0',
+            color: 'var(--text-primary)',
+            borderBottom: '1px solid var(--border-light)',
+            paddingBottom: '4px'
+          }
+        }, 'Markdown Linting'),
+        
+        // Enable/Disable Linting
+        React.createElement('label', {
+          style: { 
+            display: 'flex', 
+            alignItems: 'center',
+            marginBottom: '12px',
+            gap: '8px' 
+          }
+        },
+          React.createElement('input', {
+            type: 'checkbox',
+            checked: localPrefs.markdownLinting?.enabled !== false, // Default to true
+            onChange: (e) => setLocalPrefs(prev => ({
+              ...prev,
+              markdownLinting: {
+                ...prev.markdownLinting,
+                enabled: e.target.checked
+              }
+            }))
+          }),
+          React.createElement('span', { 
+            style: { 
+              fontWeight: 'bold',
+              color: 'var(--text-primary)'
+            } 
+          }, 'Enable real-time markdown linting')
+        ),
+        
+        // Lint Panel Visibility
+        React.createElement('label', {
+          style: { 
+            display: 'flex', 
+            alignItems: 'center',
+            marginBottom: '12px',
+            gap: '8px' 
+          }
+        },
+          React.createElement('input', {
+            type: 'checkbox',
+            checked: localPrefs.markdownLinting?.showPanelByDefault !== false, // Default to true
+            onChange: (e) => setLocalPrefs(prev => ({
+              ...prev,
+              markdownLinting: {
+                ...prev.markdownLinting,
+                showPanelByDefault: e.target.checked
+              }
+            }))
+          }),
+          React.createElement('span', { 
+            style: { 
+              fontWeight: 'bold',
+              color: 'var(--text-primary)'
+            } 
+          }, 'Show lint results panel by default')
+        ),
+        
+        // Rule Categories
+        React.createElement('div', {
+          style: { marginTop: '16px' }
+        },
+          React.createElement('label', {
+            style: { 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: 'bold',
+              color: 'var(--text-primary)'
+            }
+          }, 'Rule Severity Levels'),
+          
+          // Error rules toggle
+          React.createElement('label', {
+            style: { 
+              display: 'flex', 
+              alignItems: 'center',
+              marginBottom: '6px',
+              gap: '8px',
+              marginLeft: '12px'
+            }
+          },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: localPrefs.markdownLinting?.showErrors !== false, // Default to true
+              onChange: (e) => setLocalPrefs(prev => ({
+                ...prev,
+                markdownLinting: {
+                  ...prev.markdownLinting,
+                  showErrors: e.target.checked
+                }
+              }))
+            }),
+            React.createElement('span', { 
+              style: { 
+                color: '#dc3545',
+                fontWeight: '500'
+              } 
+            }, '● Errors'),
+            React.createElement('span', { 
+              style: { 
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                marginLeft: '4px'
+              } 
+            }, '(syntax issues)')
+          ),
+          
+          // Warning rules toggle
+          React.createElement('label', {
+            style: { 
+              display: 'flex', 
+              alignItems: 'center',
+              marginBottom: '6px',
+              gap: '8px',
+              marginLeft: '12px'
+            }
+          },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: localPrefs.markdownLinting?.showWarnings !== false, // Default to true
+              onChange: (e) => setLocalPrefs(prev => ({
+                ...prev,
+                markdownLinting: {
+                  ...prev.markdownLinting,
+                  showWarnings: e.target.checked
+                }
+              }))
+            }),
+            React.createElement('span', { 
+              style: { 
+                color: '#ffc107',
+                fontWeight: '500'
+              } 
+            }, '▲ Warnings'),
+            React.createElement('span', { 
+              style: { 
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                marginLeft: '4px'
+              } 
+            }, '(style inconsistencies)')
+          ),
+          
+          // Info rules toggle
+          React.createElement('label', {
+            style: { 
+              display: 'flex', 
+              alignItems: 'center',
+              marginBottom: '6px',
+              gap: '8px',
+              marginLeft: '12px'
+            }
+          },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: localPrefs.markdownLinting?.showInfo !== false, // Default to true
+              onChange: (e) => setLocalPrefs(prev => ({
+                ...prev,
+                markdownLinting: {
+                  ...prev.markdownLinting,
+                  showInfo: e.target.checked
+                }
+              }))
+            }),
+            React.createElement('span', { 
+              style: { 
+                color: '#4078c0',
+                fontWeight: '500'
+              } 
+            }, 'ⓘ Info'),
+            React.createElement('span', { 
+              style: { 
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                marginLeft: '4px'
+              } 
+            }, '(best practices)')
+          )
+        ),
+        
+        React.createElement('div', {
+          style: {
+            marginTop: '8px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)'
+          }
+        }, 'Linting helps ensure your markdown follows best practices and renders correctly across different platforms')
+      ),
       
       // Action Buttons
       React.createElement('div', {
@@ -1977,7 +2169,8 @@ function App() {
     name: 'Untitled.md',
     content: '# Welcome to willisMD\n\nStart typing to see your markdown!',
     path: null,
-    isDirty: false
+    isDirty: false,
+    mtime: null
   }]);
   
   const [activeTabId, setActiveTabId] = useState(tabs[0].id);
@@ -1989,6 +2182,10 @@ function App() {
   const [isExplorerVisible, setIsExplorerVisible] = useState(true);
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
   const [searchMode, setSearchMode] = useState(false);
+  const [isLintPanelVisible, setIsLintPanelVisible] = useState(true);
+  
+  // Input dialog state for file/folder creation
+  const [showInputDialog, setShowInputDialog] = useState(null);
   
   // Panel width state
   const [explorerWidth, setExplorerWidth] = useState(250);
@@ -2003,8 +2200,16 @@ function App() {
   const [previewScrollPercentage, setPreviewScrollPercentage] = useState(null);
   const [lastScrollSource, setLastScrollSource] = useState(null);
   
-  // Preferences state
-  const [preferences, setPreferences] = useState({});
+  // Preferences state with defaults
+  const [preferences, setPreferences] = useState({
+    markdownLinting: {
+      enabled: true,
+      showErrors: true,
+      showWarnings: true,
+      showInfo: true,
+      showPanelByDefault: true
+    }
+  });
   const [showPreferences, setShowPreferences] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
@@ -2140,13 +2345,35 @@ function App() {
   
   const handleSavePreferences = async (newPreferences) => {
     console.log('App: Saving preferences', newPreferences);
+    
+    // Ensure markdownLinting object exists with proper defaults
+    if (!newPreferences.markdownLinting) {
+      newPreferences.markdownLinting = {
+        enabled: true,
+        showErrors: true,
+        showWarnings: true,
+        showInfo: true,
+        showPanelByDefault: true
+      };
+    }
+    
     try {
       const result = await window.electronAPI.preferencesSave(newPreferences);
       setPreferences(newPreferences);
       
+      // Update the global lint preferences so the linter uses them
+      loadMarkdownLinter().then(({ updateLintPreferences }) => {
+        updateLintPreferences(newPreferences);
+      });
+      
       // Update auto save if changed
       if (newPreferences.autoSave !== autoSaveEnabled) {
         setAutoSaveEnabled(newPreferences.autoSave);
+      }
+      
+      // Update lint panel visibility based on preferences
+      if (newPreferences.markdownLinting && !newPreferences.markdownLinting.enabled) {
+        setIsLintPanelVisible(false);
       }
       
       setStatus('✓ Preferences saved');
@@ -2228,7 +2455,8 @@ function App() {
                 name: filePath.split('/').pop(),
                 content: result.content,
                 path: filePath,
-                isDirty: false
+                isDirty: false,
+                mtime: result.mtime || null
               };
               setTabs(prev => [...prev, newTab]);
               setActiveTabId(newTab.id);
@@ -2254,10 +2482,59 @@ function App() {
         setStatus(`Saving: ${current.name}`);
         
         try {
-          const result = await window.electronAPI.writeFile(current.path, current.content);
+          const result = await window.electronAPI.writeFile(current.path, current.content, current.mtime);
+          
+          if (result.conflict) {
+            // File has been modified externally
+            const confirmResult = await window.electronAPI.showMessageBox({
+              type: 'warning',
+              title: 'File Modified Externally',
+              message: `The file "${current.name}" has been modified by another program.`,
+              detail: 'Do you want to overwrite the external changes or reload the file?',
+              buttons: ['Overwrite', 'Reload', 'Cancel'],
+              defaultId: 2,
+              cancelId: 2
+            });
+            
+            if (confirmResult.response === 0) {
+              // Overwrite - save without mtime check
+              const forceResult = await window.electronAPI.writeFile(current.path, current.content);
+              if (forceResult.success) {
+                setTabs(prev => prev.map(tab => 
+                  tab.id === current.id ? { ...tab, isDirty: false, mtime: forceResult.mtime } : tab
+                ));
+                setStatus(`✓ Saved (overwritten): ${current.name}`);
+                // Refresh file explorer
+                if (fileExplorerRef.current) {
+                  fileExplorerRef.current.refresh();
+                }
+              } else {
+                setStatus(`✗ Save failed: ${forceResult.error}`);
+              }
+            } else if (confirmResult.response === 1) {
+              // Reload the file
+              const readResult = await window.electronAPI.readFile(current.path);
+              if (readResult.success) {
+                setTabs(prev => prev.map(tab => 
+                  tab.id === current.id ? { 
+                    ...tab, 
+                    content: readResult.content, 
+                    isDirty: false,
+                    mtime: readResult.mtime 
+                  } : tab
+                ));
+                setStatus(`✓ Reloaded: ${current.name}`);
+              } else {
+                setStatus(`✗ Reload failed: ${readResult.error}`);
+              }
+            }
+            // If Cancel (response === 2), do nothing
+            return;
+          }
+          
           if (result.success) {
             setTabs(prev => prev.map(tab => 
-              tab.id === current.id ? { ...tab, isDirty: false } : tab
+              tab.id === current.id ? { ...tab, isDirty: false, mtime: result.mtime } : tab
             ));
             setStatus(`✓ Saved: ${current.name}`);
             // Refresh file explorer to show updated file
@@ -2295,7 +2572,8 @@ function App() {
                 ...tab,
                 path: dialogResult.filePath,
                 name: dialogResult.filePath.split('/').pop(),
-                isDirty: false
+                isDirty: false,
+                mtime: saveResult.mtime
               } : tab
             ));
             setStatus(`✓ Saved: ${dialogResult.filePath.split('/').pop()}`);
@@ -2714,12 +2992,16 @@ function App() {
         setStatus('Auto-saving...');
         
         try {
-          const result = await window.electronAPI.writeFile(currentTab.path, currentTab.content);
+          const result = await window.electronAPI.writeFile(currentTab.path, currentTab.content, currentTab.mtime);
           if (result.success) {
             setTabs(prev => prev.map(tab => 
-              tab.id === currentTab.id ? { ...tab, isDirty: false } : tab
+              tab.id === currentTab.id ? { ...tab, isDirty: false, mtime: result.mtime } : tab
             ));
             setStatus('✓ Auto-saved');
+          } else if (result.conflict) {
+            // Don't auto-save if there's a conflict, notify user
+            setStatus('⚠️ File modified externally - auto-save cancelled');
+            setAutoSaveEnabled(false);
           } else {
             setStatus(`✗ Auto-save failed: ${result.error}`);
           }
@@ -2743,10 +3025,32 @@ function App() {
       try {
         console.log('Loading preferences...');
         const prefs = await window.electronAPI.preferencesLoad();
+        
+        // Ensure markdown linting preferences have defaults
+        if (!prefs.markdownLinting) {
+          prefs.markdownLinting = {
+            enabled: true,
+            showErrors: true,
+            showWarnings: true,
+            showInfo: true,
+            showPanelByDefault: true
+          };
+        }
+        
         setPreferences(prefs);
+        
+        // Update the global lint preferences so the linter uses them
+        loadMarkdownLinter().then(({ updateLintPreferences }) => {
+          updateLintPreferences(prefs);
+        });
         
         // Set auto save
         setAutoSaveEnabled(prefs.autoSave || false);
+        
+        // Set lint panel visibility based on preferences
+        if (prefs.markdownLinting && prefs.markdownLinting.showPanelByDefault !== undefined) {
+          setIsLintPanelVisible(prefs.markdownLinting.showPanelByDefault);
+        }
         
         // Open default folder if set
         if (prefs.defaultFolder) {
@@ -3018,7 +3322,8 @@ function App() {
             name: filePath.split('/').pop(),
             content: result.content,
             path: filePath,
-            isDirty: false
+            isDirty: false,
+            mtime: result.mtime // Store the modification time
           };
           setTabs(prev => [...prev, newTab]);
           setActiveTabId(newTab.id);
@@ -3040,66 +3345,133 @@ function App() {
   
   // Toolbar wrapper functions for file operations
   const handleToolbarCreateFile = async () => {
-    if (currentFolder) {
-      const fileName = prompt('Enter file name:');
-      if (fileName) {
-        const filePath = `${currentFolder}/${fileName}${fileName.endsWith('.md') ? '' : '.md'}`;
-        const content = `# ${fileName.replace(/\.md$/, '')}\n\n`;
-        
-        try {
-          // Actually create the file on disk
-          const result = await window.electronAPI.writeFile(filePath, content);
-          if (result.success) {
-            
-            const newTab = {
-              id: Date.now(),
-              name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
-              content: content,
-              path: filePath,
-              isDirty: false
-            };
-            setTabs(prev => [...prev, newTab]);
-            setActiveTabId(newTab.id);
-            setStatus(`✓ New file created: ${newTab.name}`);
-            
-            // Refresh file explorer
-            if (fileExplorerRef.current) {
-              fileExplorerRef.current.refresh();
-            }
-          } else {
-            console.error('Toolbar: Failed to create file:', result.error);
-            setStatus(`✗ Failed to create file: ${result.error}`);
+    if (!currentFolder) {
+      setStatus('✗ Please open a folder first');
+      return;
+    }
+    
+    const fileName = prompt('Enter file name:');
+    if (fileName) {
+      // Always create in the currently open folder (top level)
+      const targetPath = currentFolder;
+      const filePath = `${targetPath}/${fileName}${fileName.endsWith('.md') ? '' : '.md'}`;
+      const content = `# ${fileName.replace(/\.md$/, '')}\n\n`;
+      
+      try {
+        const result = await window.electronAPI.writeFile(filePath, content);
+        if (result.success) {
+          const newTab = {
+            id: Date.now(),
+            name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
+            content: content,
+            path: filePath,
+            isDirty: false,
+            mtime: result.mtime || null
+          };
+          setTabs(prev => [...prev, newTab]);
+          setActiveTabId(newTab.id);
+          setStatus(`✓ File created: ${newTab.name}`);
+          
+          // Refresh file explorer
+          if (fileExplorerRef.current) {
+            fileExplorerRef.current.refresh();
           }
-        } catch (error) {
-          console.error('Toolbar: Error creating file:', error);
-          setStatus(`✗ Error creating file: ${error.message}`);
+        } else {
+          setStatus(`✗ Failed to create file: ${result.error}`);
         }
+      } catch (error) {
+        setStatus(`✗ Error creating file: ${error.message}`);
       }
     }
   };
   
   const handleToolbarCreateFolder = async () => {
-    if (currentFolder) {
-      const folderName = prompt('Enter folder name:');
-      if (folderName) {
-        const newFolderPath = `${currentFolder}/${folderName}`;
-        try {
-          const result = await window.electronAPI.createFolder(newFolderPath);
-          if (result.success) {
-                setStatus(`✓ Folder created: ${folderName}`);
-            // Refresh file explorer to show new folder
-            if (fileExplorerRef.current) {
-              fileExplorerRef.current.refresh();
-            }
-          } else {
-            console.error('Failed to create folder:', result.error);
-            setStatus(`✗ Failed to create folder: ${result.error}`);
+    if (!currentFolder) {
+      setStatus('✗ Please open a folder first');
+      return;
+    }
+    
+    const folderName = prompt('Enter folder name:');
+    if (folderName) {
+      // Always create in the currently open folder (top level)
+      const targetPath = currentFolder;
+      const newFolderPath = `${targetPath}/${folderName}`;
+      
+      try {
+        const result = await window.electronAPI.createFolder(newFolderPath);
+        if (result.success) {
+          setStatus(`✓ Folder created: ${folderName}`);
+          // Refresh file explorer
+          if (fileExplorerRef.current) {
+            fileExplorerRef.current.refresh();
           }
-        } catch (error) {
-          console.error('Error creating folder:', error);
-          setStatus(`✗ Error creating folder: ${error.message}`);
+        } else {
+          setStatus(`✗ Failed to create folder: ${result.error}`);
         }
+      } catch (error) {
+        setStatus(`✗ Error creating folder: ${error.message}`);
       }
+    }
+  };
+  
+  // Process folder creation from input dialog
+  const processFolderCreation = async (parentPath, folderName) => {
+    if (!folderName) {
+      return;
+    }
+    
+    const newFolderPath = `${parentPath}/${folderName}`;
+    try {
+      const result = await window.electronAPI.createFolder(newFolderPath);
+      if (result.success) {
+        setStatus(`✓ Folder created: ${folderName}`);
+        // Refresh file explorer
+        if (fileExplorerRef.current) {
+          fileExplorerRef.current.refresh();
+        }
+      } else {
+        setStatus(`✗ Failed to create folder: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      setStatus(`✗ Error creating folder: ${error.message}`);
+    }
+  };
+  
+  // Process file creation from input dialog
+  const processFileCreation = async (parentPath, fileName) => {
+    if (!fileName) {
+      return;
+    }
+    
+    const filePath = `${parentPath}/${fileName}${fileName.endsWith('.md') ? '' : '.md'}`;
+    const content = `# ${fileName.replace(/\.md$/, '')}\n\n`;
+    
+    try {
+      const result = await window.electronAPI.writeFile(filePath, content);
+      if (result.success) {
+        const newTab = {
+          id: Date.now(),
+          name: fileName.endsWith('.md') ? fileName : `${fileName}.md`,
+          content: content,
+          path: filePath,
+          isDirty: false,
+          mtime: result.mtime || null
+        };
+        setTabs(prev => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+        setStatus(`✓ File created: ${newTab.name}`);
+        
+        // Refresh file explorer
+        if (fileExplorerRef.current) {
+          fileExplorerRef.current.refresh();
+        }
+      } else {
+        setStatus(`✗ Failed to create file: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating file:', error);
+      setStatus(`✗ Error creating file: ${error.message}`);
     }
   };
   
@@ -3112,6 +3484,21 @@ function App() {
   const togglePreview = () => {
     setIsPreviewVisible(prev => !prev);
     setStatus(isPreviewVisible ? 'Preview hidden' : 'Preview shown');
+  };
+
+  const toggleLintPanel = () => {
+    setIsLintPanelVisible(prev => !prev);
+    setStatus(isLintPanelVisible ? 'Lint panel hidden' : 'Lint panel shown');
+  };
+
+  // Navigation function for lint panel
+  const handleNavigateToLine = (position) => {
+    const activeTab = tabs.find(tab => tab.id === activeTabId);
+    if (activeTab && editorRef.current) {
+      // Focus the editor and navigate to the position
+      editorRef.current.focus();
+      editorRef.current.setCursor(position);
+    }
   };
   
   
@@ -3279,8 +3666,8 @@ function App() {
               title: 'Hide Explorer'
             }, '✕')
           ),
-          // Explorer toolbar
-          currentFolder && React.createElement('div', {
+          // Explorer toolbar - always show for file/folder creation
+          React.createElement('div', {
             style: {
               display: 'flex',
               gap: '4px',
@@ -3294,14 +3681,20 @@ function App() {
                 cursor: 'pointer',
                 padding: '4px',
                 borderRadius: '3px',
-                fontSize: '14px',
+                fontSize: '18px',
                 color: 'var(--text-secondary)'
               },
               onClick: () => {
-                handleToolbarCreateFile();
+                console.log('File button clicked, setting dialog state');
+                if (!currentFolder) return;
+                setShowInputDialog({
+                  type: 'file',
+                  parentPath: currentFolder,
+                  title: 'Create New File',
+                  placeholder: 'Enter file name'
+                });
+                console.log('Dialog state set');
               },
-              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
-              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
               title: 'New File'
             }, '📄'),
             React.createElement('button', {
@@ -3311,24 +3704,28 @@ function App() {
                 cursor: 'pointer',
                 padding: '4px',
                 borderRadius: '3px',
-                fontSize: '14px',
+                fontSize: '18px',
                 color: 'var(--text-secondary)'
               },
               onClick: () => {
-                handleToolbarCreateFolder();
+                if (!currentFolder) return;
+                setShowInputDialog({
+                  type: 'folder',
+                  parentPath: currentFolder,
+                  title: 'Create New Folder',
+                  placeholder: 'Enter folder name'
+                });
               },
-              onMouseEnter: (e) => e.target.style.backgroundColor = 'var(--bg-accent)',
-              onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
               title: 'New Folder'
             }, '📁'),
-            React.createElement('button', {
+            currentFolder && React.createElement('button', {
               style: {
                 border: 'none',
                 background: 'none',
                 cursor: 'pointer',
                 padding: '4px',
                 borderRadius: '3px',
-                fontSize: '14px',
+                fontSize: '18px',
                 color: 'var(--text-secondary)'
               },
               onClick: () => {
@@ -3340,14 +3737,14 @@ function App() {
               onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
               title: 'Refresh Explorer'
             }, '🔄'),
-            React.createElement('button', {
+            currentFolder && React.createElement('button', {
               style: {
                 border: 'none',
                 background: 'none',
                 cursor: 'pointer',
                 padding: '4px',
                 borderRadius: '3px',
-                fontSize: '14px',
+                fontSize: '18px',
                 color: searchMode ? 'var(--button-primary-bg)' : 'var(--text-secondary)',
                 marginLeft: 'auto'
               },
@@ -3423,9 +3820,9 @@ function App() {
                   border: 'none',
                   background: 'none',
                   cursor: 'pointer',
-                  fontSize: '11px',
+                  fontSize: '16px',
                   color: isExplorerVisible ? '#007acc' : '#666',
-                  padding: '2px 4px'
+                  padding: '2px 6px'
                 },
                 onClick: toggleExplorer,
                 title: isExplorerVisible ? 'Hide Explorer' : 'Show Explorer'
@@ -3436,13 +3833,26 @@ function App() {
                   border: 'none',
                   background: 'none',
                   cursor: 'pointer',
-                  fontSize: '11px',
+                  fontSize: '16px',
                   color: isPreviewVisible ? '#007acc' : '#666',
-                  padding: '2px 4px'
+                  padding: '2px 6px'
                 },
                 onClick: togglePreview,
                 title: isPreviewVisible ? 'Hide Preview' : 'Show Preview'
-              }, isPreviewVisible ? '👁️‍🗨️' : '👁️')
+              }, isPreviewVisible ? '👁️‍🗨️' : '👁️'),
+              // Lint panel toggle (only show if linting is enabled)
+              preferences.markdownLinting && preferences.markdownLinting.enabled && React.createElement('button', {
+                style: {
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  color: isLintPanelVisible ? '#007acc' : '#666',
+                  padding: '2px 6px'
+                },
+                onClick: toggleLintPanel,
+                title: isLintPanelVisible ? 'Hide Lint Panel' : 'Show Lint Panel'
+              }, '⚠')
             )
           ),
           // Toolbar
@@ -3459,12 +3869,13 @@ function App() {
           },
             React.createElement(CodeMirrorEditor, {
               ref: editorRef,
-              key: activeTabId, // Force new instance when tab changes
+              key: `${activeTabId}-${JSON.stringify(preferences.markdownLinting || {})}`, // Force new instance when tab or lint prefs change
               initialContent: currentTab.content,
               onChange: handleContentChange,
               theme: preferences.mode || 'light',
               onScroll: handleScroll,
-              scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null
+              scrollToPercentage: lastScrollSource === 'preview' ? editorScrollPercentage : null,
+              lintPreferences: preferences
             })
           )
         ),
@@ -3565,6 +3976,14 @@ function App() {
       )
     ),
     
+    // Lint Panel (only render if linting is enabled)
+    preferences.markdownLinting && preferences.markdownLinting.enabled && React.createElement(LintPanel, {
+      isVisible: isLintPanelVisible,
+      onToggle: toggleLintPanel,
+      onNavigateToLine: handleNavigateToLine,
+      lintPreferences: preferences
+    }),
+    
     // Status bar (bottom)
     React.createElement('div', {
       className: 'status-bar',
@@ -3601,15 +4020,122 @@ function App() {
       onSelect: handleTemplateSelect
     }),
     
-    React.createElement(AboutDialog, {
-      isOpen: showAboutDialog,
-      onClose: () => setShowAboutDialog(false)
-    }),
+    // Input Dialog for file/folder creation
+    showInputDialog && React.createElement('div', {
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }
+    },
+      React.createElement('div', {
+        style: {
+          backgroundColor: 'var(--bg-primary)',
+          border: '1px solid var(--border-light)',
+          borderRadius: '4px',
+          padding: '20px',
+          minWidth: '300px'
+        }
+      },
+        React.createElement('h3', {
+          style: { margin: '0 0 15px 0', color: 'var(--text-primary)' }
+        }, showInputDialog.title),
+        React.createElement('input', {
+          type: 'text',
+          placeholder: showInputDialog.placeholder,
+          autoFocus: true,
+          style: {
+            width: '100%',
+            padding: '8px 12px',
+            border: '1px solid var(--border-light)',
+            borderRadius: '4px',
+            fontSize: '14px',
+            marginBottom: '15px',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)'
+          },
+          onKeyDown: (e) => {
+            if (e.key === 'Enter') {
+              const value = e.target.value.trim();
+              if (value) {
+                if (showInputDialog.type === 'file') {
+                  processFileCreation(showInputDialog.parentPath, value);
+                } else if (showInputDialog.type === 'folder') {
+                  processFolderCreation(showInputDialog.parentPath, value);
+                }
+              }
+              setShowInputDialog(null);
+            } else if (e.key === 'Escape') {
+              setShowInputDialog(null);
+            }
+          }
+        }),
+        React.createElement('div', {
+          style: { display: 'flex', gap: '8px', justifyContent: 'flex-end' }
+        },
+          React.createElement('button', {
+            onClick: () => setShowInputDialog(null),
+            style: {
+              padding: '6px 12px',
+              border: '1px solid var(--border-light)',
+              borderRadius: '4px',
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer'
+            }
+          }, 'Cancel'),
+          React.createElement('button', {
+            onClick: () => {
+              const input = document.querySelector('input[type="text"]');
+              const value = input.value.trim();
+              if (value) {
+                if (showInputDialog.type === 'file') {
+                  processFileCreation(showInputDialog.parentPath, value);
+                } else if (showInputDialog.type === 'folder') {
+                  processFolderCreation(showInputDialog.parentPath, value);
+                }
+              }
+              setShowInputDialog(null);
+            },
+            style: {
+              padding: '6px 12px',
+              border: '1px solid #007acc',
+              borderRadius: '4px',
+              backgroundColor: '#007acc',
+              color: '#fff',
+              cursor: 'pointer'
+            }
+          }, 'Create')
+        )
+      )
+    ),
+
+    React.createElement(React.Suspense, {
+      fallback: React.createElement('div', { style: { display: 'none' } })
+    }, [
+      React.createElement(AboutDialog, {
+        key: 'about',
+        isOpen: showAboutDialog,
+        onClose: () => setShowAboutDialog(false)
+      })
+    ]),
     
-    React.createElement(HelpDialog, {
-      isOpen: showHelpDialog,
-      onClose: () => setShowHelpDialog(false)
-    })
+    React.createElement(React.Suspense, {
+      fallback: React.createElement('div', { style: { display: 'none' } })
+    }, [
+      React.createElement(HelpDialog, {
+        key: 'help',
+        isOpen: showHelpDialog,
+        onClose: () => setShowHelpDialog(false)
+      })
+    ])
   );
 }
 

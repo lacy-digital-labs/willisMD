@@ -1096,7 +1096,16 @@ async function createMenu() {
               mainWindow.webContents.send('menu-print');
             }
           }
-        }
+        },
+        // Add Exit option for non-macOS platforms
+        ...(process.platform !== 'darwin' ? [
+          { type: 'separator' },
+          {
+            label: process.platform === 'win32' ? 'Exit' : 'Quit',
+            accelerator: process.platform === 'win32' ? 'Alt+F4' : 'Ctrl+Q',
+            click: () => app.quit()
+          }
+        ] : [])
       ]
     },
     {
@@ -1269,17 +1278,57 @@ async function createMenu() {
 ipcMain.handle('read-file', async (event, filePath) => {
   try {
     const content = await fs.readFile(filePath, 'utf-8');
-    return { success: true, content };
+    const stats = await fs.stat(filePath);
+    const mtime = stats.mtime.getTime();
+    return { success: true, content, mtime };
   } catch (error) {
     return { success: false, error: error.message };
   }
 });
 
-ipcMain.handle('write-file', async (event, filePath, content) => {
+ipcMain.handle('write-file', async (event, filePath, content, expectedMtime) => {
   try {
+    // Check if file has been modified externally
+    if (expectedMtime) {
+      try {
+        const stats = await fs.stat(filePath);
+        const currentMtime = stats.mtime.getTime();
+        
+        // If modification time doesn't match, file was changed externally
+        if (Math.abs(currentMtime - expectedMtime) > 1000) { // Allow 1 second tolerance
+          return { 
+            success: false, 
+            conflict: true,
+            error: 'File has been modified externally',
+            currentMtime 
+          };
+        }
+      } catch (statError) {
+        // File doesn't exist or can't be accessed, proceed with save
+        console.log('Could not stat file, proceeding with save:', statError.message);
+      }
+    }
+    
     await fs.writeFile(filePath, content, 'utf-8');
-    return { success: true };
+    
+    // Get the new modification time
+    const newStats = await fs.stat(filePath);
+    const newMtime = newStats.mtime.getTime();
+    
+    return { success: true, mtime: newMtime };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('check-file-modified', async (event, filePath, expectedMtime) => {
+  try {
+    const stats = await fs.stat(filePath);
+    const currentMtime = stats.mtime.getTime();
+    const isModified = Math.abs(currentMtime - expectedMtime) > 1000; // Allow 1 second tolerance
+    return { success: true, isModified, currentMtime };
+  } catch (error) {
+    // File doesn't exist or can't be accessed
     return { success: false, error: error.message };
   }
 });

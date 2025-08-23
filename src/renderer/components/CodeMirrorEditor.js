@@ -8,12 +8,14 @@ import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } 
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { githubLight } from '@uiw/codemirror-theme-github';
+import { lintGutter } from '@codemirror/lint';
+import { createMarkdownLinter, lintResultsManager } from '../markdownLinter';
 import './CodeMirrorEditor.css';
 
 // Create an annotation for formatting operations
 const formattingAnnotation = Annotation.define();
 
-const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'light', onScroll, scrollToPercentage }, ref) => {
+const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'light', onScroll, scrollToPercentage, lintPreferences = {} }, ref) => {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
   const isScrollingRef = useRef(false);
@@ -611,11 +613,17 @@ const CodeMirrorEditor = forwardRef(({ initialContent = '', onChange, theme = 'l
     ];
 
     // Create the editor state with initial content
+    const lintingEnabled = lintPreferences && lintPreferences.markdownLinting && lintPreferences.markdownLinting.enabled;
+    const lintingExtensions = lintingEnabled 
+      ? [createMarkdownLinter(lintPreferences), lintGutter()]
+      : [];
+    
     const startState = EditorState.create({
       doc: initialContent,
       extensions: [
         ...basicSetupExtensions,
         markdown(),
+        ...lintingExtensions,
         theme === 'dark' ? oneDark : githubLight,
         EditorView.theme({
           '&': {

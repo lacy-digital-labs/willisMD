@@ -132,3 +132,147 @@
 .cm-cursor {
   border-left-color: var(--text-primary);
 }
+
+/* Linting styles */
+.cm-lintRange-error {
+  text-decoration: underline wavy red;
+  text-underline-position: under;
+}
+
+.cm-lintRange-warning {
+  text-decoration: underline wavy orange;
+  text-underline-position: under;
+}
+
+.cm-lintRange-info {
+  text-decoration: underline wavy #4078c0;
+  text-underline-position: under;
+}
+
+.cm-lintRange-hint {
+  text-decoration: underline dotted #6a737d;
+  text-underline-position: under;
+}
+
+/* Lint gutter markers */
+.cm-lint-marker {
+  width: 16px;
+  height: 16px;
+}
+
+.cm-lint-marker-error {
+  content: "●";
+  color: #dc3545;
+}
+
+.cm-lint-marker-warning {
+  content: "▲";
+  color: #ffc107;
+}
+
+.cm-lint-marker-info {
+  content: "ⓘ";
+  color: #4078c0;
+}
+
+/* Lint tooltip styles */
+.cm-tooltip-lint {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  padding: 8px 12px;
+  max-width: 400px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.cm-lint-message {
+  line-height: 1.4;
+}
+
+.cm-lint-message-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.cm-lint-message-rule {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.cm-lint-message-detail {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.cm-lint-message-fix {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-light);
+  color: var(--success);
+  font-size: 12px;
+}
+
+/* Lint panel styles */
+.cm-panel.cm-panel-lint {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-medium);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cm-panel-lint ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cm-panel-lint li {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-panel-lint li:hover {
+  background: var(--bg-accent);
+}
+
+.cm-panel-lint .cm-lint-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.cm-panel-lint .cm-lint-icon-error {
+  color: #dc3545;
+}
+
+.cm-panel-lint .cm-lint-icon-warning {
+  color: #ffc107;
+}
+
+.cm-panel-lint .cm-lint-icon-info {
+  color: #4078c0;
+}
+
+.cm-panel-lint .cm-lint-message {
+  flex: 1;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-panel-lint .cm-lint-line {
+  color: var(--text-secondary);
+  font-size: 12px;
+  flex-shrink: 0;
+}
