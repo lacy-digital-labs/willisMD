@@ -76,6 +76,16 @@ The project is actively developed with a fully functional Electron + React appli
 - `npm run build:electron` - Package the Electron app with electron-builder
 - `npm test` - Run tests (test framework not yet configured)
 
+## Release Process
+
+When creating a new release:
+1. Update version in `package.json`
+2. **IMPORTANT: Update version in `/public/About.md` (line 3: "## Version X.X.X")**
+3. Update the "What's New" section in `/public/About.md` with release notes
+4. Commit changes with version bump message
+5. Create and push git tag: `git tag vX.X.X && git push origin vX.X.X`
+6. GitHub Actions will automatically build and attach artifacts to the release
+
 ## Project Structure
 
 ```
