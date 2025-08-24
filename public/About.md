@@ -1,6 +1,6 @@
 # About willisMD
 
-## Version 0.8.7
+## Version 1.0.0
 
 willisMD is a cross-platform markdown editor designed to make writing and editing markdown documents a seamless experience. Built with modern web technologies and packaged as a desktop application, it combines the simplicity of markdown with the convenience of a native editor.
 
@@ -29,18 +29,20 @@ willisMD is a cross-platform markdown editor designed to make writing and editin
 - **Print Support**: Print your documents with proper theme styling
 - **Clean, Professional Output**: Beautiful document rendering across all formats
 
-## What's New in v0.8.7
+## What's New in v1.0.0
 
-### Theme Export Fix
-- Fixed theme selection for all export formats (PDF, HTML, EPUB, DOCX)
-- Exports now correctly use your selected preview theme
-- Resolved production build issues with theme loading
+### Milestone Release
+- First major stable release of willisMD
+- Feature-complete markdown editing experience
+- Production-ready for daily use
+- Optimized performance and bundle size
 
-### Technical Improvements
-- Enhanced webpack configuration for better stability
-- Improved Content Security Policy
-- Fixed module loading errors in packaged applications
-- Better synchronization between preview and export themes
+### Recent Improvements
+- Enhanced search functionality for knowledge management
+- Fixed theme mode issues with preview styles
+- Improved file explorer with better auto-refresh
+- Word wrap support for easier editing
+- Full CodeMirror 6 integration as the default editor
 
 ## Keyboard Shortcuts
 
