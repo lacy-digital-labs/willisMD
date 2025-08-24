@@ -1,6 +1,6 @@
 {
   "name": "willismd",
-  "version": "0.9.4",
+  "version": "1.0.0",
   "description": "A cross-platform markdown editor with live preview, built with Electron and React.",
   "main": "src/main/main.js",
   "scripts": {
@@ -86,6 +86,7 @@
     "directories": {
       "output": "build"
     },
+    "publish": null,
     "files": [
       "dist/**/*",
       "src/main/**/*",
@@ -111,15 +112,9 @@
             "arm64",
             "x64"
           ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
         }
-      ]
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "win": {
       "target": [
@@ -130,7 +125,8 @@
           ]
         }
       ],
-      "icon": "public/icon.ico"
+      "icon": "public/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "linux": {
       "target": [
