@@ -1,10 +1,12 @@
-# willisMD
+# willisMD Community Edition
 
 A cross-platform markdown editor with live preview and advanced editing capabilities, built with Electron and React.  You might ask why create another markdown editor?  While there are a lot of editors out there, I didn't find one that was fully open source, multi-platform (Linux, Mac, Windows) that I really liked.  I wanted simple file browser and markdown editing with multiple tabs and live preview and an option to auto save and use basic templates.  So I used Anthropic Claude to help create it.
 
-willisMD is open source and built as a passion project, but if its useful to you, consider throwing a few dollars our way as a donation to continue the effort.  Competing products have costly monthly or annual subscriptions.  Anything you can contribute would be appreciated.
+willisMD Community Edition is open source and built as a passion project, but if its useful to you, consider throwing a few dollars our way as a donation to continue support of the open source edition. 
 
 [:heart: Sponsor](https://buy.stripe.com/00weVcb8WgmJ4571SW4F200)
+
+My major future focus will be on willisMD Pro, a professional edition with more advanced feature that will be a commercial product.  If willisMD Community Edition meets your needs, I am delighted.  The willisMD Pro edition will be released in comming months with the same base, but expanded features.  More details soon.
 
 ## 🌟 Overview
 
@@ -127,14 +129,6 @@ npm run build:electron # Package Electron app
 - **File loading**: < 500ms for files up to 1MB  
 - **Real-time preview**: < 100ms update latency
 - **Memory efficient**: Optimized for large documents
-
-## 🔮 Roadmap
-
-### Upcoming Features
-- **Advanced markdown support**: Tables, task lists, footnotes, LaTeX math
-- **Mermaid diagrams** integration
-- **Multi-window support**
-- **Cloud synchronization**
 
 ## 🤝 Contributing
 

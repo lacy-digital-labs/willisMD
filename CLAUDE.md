@@ -51,19 +51,8 @@ The project is actively developed with a fully functional Electron + React appli
 21. ✅ Support for Wiki style links
 22. ✅ Word wrap in editor for easier editing of long lines
 23. ✅ Search functionality in file explorer for knowledge management
+23. ✅ Markdown linting
 
-## Features to Implement
-
-1. Multi-window support
-2. Advanced markdown support:
-   - Tables (partial support via marked)
-   - Task lists
-   - Footnotes
-   - Math equations (LaTeX)
-   - Mermaid diagrams
-3. Keyboard shortcuts for all menu actions
-5. Auto-completion for markdown syntax
-6. Markdown linting
 
 
 ## Development Commands
